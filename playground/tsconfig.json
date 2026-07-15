@@ -1,0 +1,10 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "paths": {
+      "vue-pdf-flipbook/style.css": ["../src/styles/flipbook.css"],
+      "vue-pdf-flipbook": ["../src/index.ts"]
+    }
+  },
+  "include": ["src/**/*.ts", "src/**/*.vue", "../src/**/*.ts", "../src/**/*.vue"]
+}
