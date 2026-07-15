@@ -104,6 +104,39 @@ describe('FlipEngine', () => {
     expect(pages[4]!.style.left).toBe('0px')
   })
 
+  describe('trailing blank page', () => {
+    // 5 real pages + 1 synthetic blank appended by the component layer.
+    const paddedInit = { pages: makePages(6), showCover: true, trailingBlank: true }
+
+    it('ends an odd book on a lone blank back cover in landscape', () => {
+      const { pages, engine } = makeEngine({ ...paddedInit })
+      // Spreads: [1] [2,3] [4,5] [6-blank].
+      engine.flip(5)
+      expect(engine.getCurrentSpread()).toEqual([4, 5])
+      engine.flipNext()
+      expect(engine.getCurrentSpread()).toEqual([6])
+      expect(pages[5]!.style.left).toBe('0px') // back cover sits on the left half
+      engine.flipNext()
+      expect(engine.getCurrentSpread()).toEqual([6]) // clamped at the end
+    })
+
+    it('skips the blank in portrait and remaps across orientation changes', () => {
+      const { root, engine } = makeEngine({ ...paddedInit, mode: 'auto' })
+      Object.defineProperty(root, 'clientWidth', { configurable: true, value: 900 })
+      engine.update()
+      engine.flip(99)
+      expect(engine.getCurrentSpread()).toEqual([6])
+
+      Object.defineProperty(root, 'clientWidth', { configurable: true, value: 390 })
+      engine.update()
+      expect(engine.getOrientation()).toBe('portrait')
+      // The blank does not exist in portrait: rest on the last real page.
+      expect(engine.getCurrentSpread()).toEqual([5])
+      engine.flipNext()
+      expect(engine.getCurrentPage()).toBe(5)
+    })
+  })
+
   it('fires callbacks with 1-based pages', () => {
     const onFlip = vi.fn()
     const onFlipStart = vi.fn()

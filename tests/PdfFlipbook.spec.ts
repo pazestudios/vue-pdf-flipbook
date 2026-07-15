@@ -226,6 +226,46 @@ describe('PdfFlipbook', () => {
     })
   })
 
+  describe('blank back cover for odd page counts', () => {
+    it('pads the book with a blank page but keeps public numbering to the PDF', async () => {
+      __reset({ numPages: 7 })
+      const wrapper = mountBook()
+      await whenReady(wrapper)
+      // Spreads: [1] [2,3] [4,5] [6,7] [blank].
+      expect(wrapper.findAll('[data-pdf-flipbook-page]')).toHaveLength(7)
+      expect(wrapper.find('[data-pdf-flipbook-blank]').exists()).toBe(true)
+
+      const vm = wrapper.vm as unknown as { goToPage: (p: number) => void; next: () => void }
+      vm.goToPage(7)
+      await vi.waitFor(() =>
+        expect(wrapper.find('[data-pdf-flipbook-indicator]').text()).toBe('6–7 / 7'),
+      )
+
+      vm.next()
+      // The blank has no PDF page: the indicator and events report the last
+      // real page, and the lone back cover is centered by the 25% shift.
+      await vi.waitFor(() =>
+        expect(wrapper.find('[data-pdf-flipbook-indicator]').text()).toBe('7 / 7'),
+      )
+      expect(wrapper.emitted('page-changed')!.at(-1)![0]).toEqual({ page: 7, totalPages: 7 })
+      expect(wrapper.emitted('flip-start')!.at(-1)![0]).toEqual({ fromPage: 6, toPage: 7 })
+      const shell = wrapper.find('[data-pdf-flipbook-shell]').element as HTMLElement
+      expect(shell.style.transform).toBe('translateX(25%)')
+      expect(wrapper.find('[data-pdf-flipbook-next]').attributes('disabled')).toBeDefined()
+    })
+
+    it('does not pad even books or books without a cover', async () => {
+      const even = mountBook()
+      await whenReady(even)
+      expect(even.find('[data-pdf-flipbook-blank]').exists()).toBe(false)
+
+      __reset({ numPages: 7 })
+      const noCover = mountBook({ showCover: false })
+      await whenReady(noCover)
+      expect(noCover.find('[data-pdf-flipbook-blank]').exists()).toBe(false)
+    })
+  })
+
   describe('fullscreen', () => {
     afterEach(() => {
       Object.defineProperty(document, 'fullscreenElement', {

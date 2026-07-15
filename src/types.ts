@@ -67,9 +67,11 @@ export interface PdfFlipbookProps {
   /** 'auto' | 'single' | 'spread'. Default 'auto'. */
   mode?: FlipMode
   /**
-   * Show the first page alone (centered) like a book cover; the last page is
-   * also shown alone and centered when page parity allows. Set to false to
-   * always open on a full two-page spread. Default true.
+   * Show the first page alone (centered) like a book cover, and end the book
+   * on a lone, centered back cover. PDFs with an odd page count get one blank
+   * filler page (`.vpf-page-blank`) appended so the book can always close;
+   * page numbers in events, controls, and slots never include it. Set to
+   * false to always open on a full two-page spread. Default true.
    */
   showCover?: boolean
   /** Pass-through StPageFlip settings. */

@@ -15,6 +15,12 @@ export interface PageFlipInit {
   maxHeight?: number
   flipOptions?: FlipOptions
   pageClass?: string
+  /**
+   * Append one synthetic blank page (no canvas) after the real pages so an
+   * odd-count book can end on a lone back cover. `pageCount` must already
+   * include it.
+   */
+  trailingBlank?: boolean
 }
 
 export interface PageFlipCallbacks {
@@ -25,7 +31,8 @@ export interface PageFlipCallbacks {
 
 export interface PageElement {
   root: HTMLElement
-  canvas: HTMLCanvasElement
+  /** null for the synthetic trailing blank page — it has no PDF content. */
+  canvas: HTMLCanvasElement | null
 }
 
 /**
@@ -36,15 +43,24 @@ export interface PageElement {
 export function createPageElements(init: PageFlipInit): PageElement[] {
   const elements: PageElement[] = []
   for (let i = 0; i < init.pageCount; i++) {
+    const isBlank = Boolean(init.trailingBlank) && i === init.pageCount - 1
     const root = document.createElement('div')
-    root.className = init.pageClass ? `vpf-page ${init.pageClass}` : 'vpf-page'
+    const classes = ['vpf-page']
+    if (isBlank) classes.push('vpf-page-blank')
+    if (init.pageClass) classes.push(init.pageClass)
+    root.className = classes.join(' ')
     const isCover = init.showCover && (i === 0 || i === init.pageCount - 1)
     root.dataset.density = isCover ? 'hard' : 'soft'
-    root.setAttribute('data-pdf-flipbook-page', String(i + 1))
     // Critical layout styles are inlined so the book renders correctly even
     // when the consumer skips the optional style.css.
     root.style.overflow = 'hidden'
     if (!init.pageClass) root.style.background = '#fff'
+    if (isBlank) {
+      root.setAttribute('data-pdf-flipbook-blank', '')
+      elements.push({ root, canvas: null })
+      continue
+    }
+    root.setAttribute('data-pdf-flipbook-page', String(i + 1))
     const canvas = document.createElement('canvas')
     canvas.className = 'vpf-canvas'
     canvas.setAttribute('data-pdf-flipbook-canvas', '')
@@ -78,6 +94,7 @@ export function usePageFlip(callbacks: PageFlipCallbacks) {
       maxWidth: options.maxWidth,
       minHeight: options.minHeight,
       maxHeight: options.maxHeight,
+      trailingBlank: options.trailingBlank,
       ...options.flipOptions,
       onFlip: callbacks.onFlip,
       onFlipStart: callbacks.onFlipStart,

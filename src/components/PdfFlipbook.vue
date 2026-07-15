@@ -63,14 +63,20 @@ const zoom = useZoom(() => viewportRef.value, {
 const flip = usePageFlip({
   onFlip(page) {
     syncSpreadFromEngine()
-    shiftPage.value = currentPage.value
-    renderer.updateWindow(page)
-    emit('page-changed', { page, totalPages: totalPages.value })
+    // shiftPage keeps the raw engine page: the synthetic blank back cover
+    // numbers past the PDF, which is exactly what the >= totalPages check
+    // in singleShift needs to keep the lone blank centered.
+    shiftPage.value = page
+    renderer.updateWindow(currentPage.value)
+    emit('page-changed', { page: currentPage.value, totalPages: totalPages.value })
   },
   onFlipStart(fromPage, toPage) {
     // Start the centering shift immediately so it runs in parallel with the flip.
     shiftPage.value = toPage
-    emit('flip-start', { fromPage, toPage })
+    emit('flip-start', {
+      fromPage: Math.min(fromPage, totalPages.value),
+      toPage: Math.min(toPage, totalPages.value),
+    })
   },
   onOrientationChange(value) {
     orientation.value = value
@@ -84,8 +90,11 @@ const flip = usePageFlip({
 function syncSpreadFromEngine(): void {
   const spread = flip.getInstance()?.getCurrentSpread()
   if (!spread?.length) return
-  currentPage.value = spread[0]!
-  visiblePages.value = spread
+  // The synthetic blank back cover (page totalPages+1) has no PDF page:
+  // report the last real page instead so public numbering never exceeds it.
+  const real = spread.filter((p) => p <= totalPages.value)
+  visiblePages.value = real.length ? real : [totalPages.value]
+  currentPage.value = visiblePages.value[0]!
 }
 
 const renderer = usePdfRenderer({
@@ -125,8 +134,12 @@ async function setup(): Promise<void> {
   const bookEl = bookRef.value
   if (my !== setupEpoch || !bookEl) return
 
+  // A book with a cover needs an even page count to close on a lone back
+  // cover; odd PDFs get one synthetic blank page appended.
+  const trailingBlank = props.showCover && doc.numPages % 2 === 1
   const pages = await flip.init(bookEl, {
-    pageCount: doc.numPages,
+    pageCount: doc.numPages + (trailingBlank ? 1 : 0),
+    trailingBlank,
     pageWidth,
     pageHeight,
     startPage: props.startPage,
@@ -146,7 +159,9 @@ async function setup(): Promise<void> {
   }
 
   renderer.setDocument(doc)
-  pages.forEach((page, i) => renderer.registerCanvas(i + 1, page.canvas))
+  pages.forEach((page, i) => {
+    if (page.canvas) renderer.registerCanvas(i + 1, page.canvas)
+  })
   syncSpreadFromEngine()
   shiftPage.value = currentPage.value
   pageDims.value = { width: pageWidth, height: pageHeight }

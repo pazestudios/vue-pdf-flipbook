@@ -26,7 +26,7 @@ describe('createPageElements', () => {
     expect(pages).toHaveLength(6)
     expect(pages[2]!.root.getAttribute('data-pdf-flipbook-page')).toBe('3')
     expect(pages[2]!.root.contains(pages[2]!.canvas)).toBe(true)
-    expect(pages[2]!.canvas.hasAttribute('data-pdf-flipbook-canvas')).toBe(true)
+    expect(pages[2]!.canvas!.hasAttribute('data-pdf-flipbook-canvas')).toBe(true)
   })
 
   it('marks first and last pages as hard covers when showCover is set', () => {
@@ -37,6 +37,19 @@ describe('createPageElements', () => {
 
     const noCover = createPageElements(baseInit({ showCover: false }))
     expect(noCover[0]!.root.dataset.density).toBe('soft')
+  })
+
+  it('appends a canvas-less hard blank page when trailingBlank is set', () => {
+    const pages = createPageElements(baseInit({ pageCount: 6, trailingBlank: true }))
+    const blank = pages[5]!
+    expect(blank.canvas).toBeNull()
+    expect(blank.root.className).toBe('vpf-page vpf-page-blank')
+    expect(blank.root.hasAttribute('data-pdf-flipbook-blank')).toBe(true)
+    expect(blank.root.hasAttribute('data-pdf-flipbook-page')).toBe(false)
+    // The blank acts as the book's back cover.
+    expect(blank.root.dataset.density).toBe('hard')
+    expect(pages[4]!.canvas).not.toBeNull()
+    expect(pages[4]!.root.dataset.density).toBe('soft')
   })
 
   it('applies the consumer pageClass', () => {

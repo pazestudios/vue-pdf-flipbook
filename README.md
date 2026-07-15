@@ -130,7 +130,7 @@ Every internal element also carries a stable data attribute (`data-pdf-flipbook`
 | `minWidth` / `maxWidth` / `minHeight` / `maxHeight` | `number` | derived | Responsive size bounds |
 | `startPage` | `number` | `1` | Initial page (1-based) |
 | `mode` | `'auto' \| 'single' \| 'spread'` | `'auto'` | Page display mode |
-| `showCover` | `boolean` | `true` | Open on the first page alone (centered); the last page is also shown alone when parity allows. Set `false` to always show full spreads |
+| `showCover` | `boolean` | `true` | Open on the first page alone (centered) and close on a lone back cover. Odd page counts get a blank filler page appended (`.vpf-page-blank`, stylable via CSS); it never appears in page numbers. Set `false` to always show full spreads |
 | `flipOptions` | `FlipOptions` | — | Flip animation tuning (`flippingTime`, `drawShadow`, `maxShadowOpacity`, `swipeDistance`, `useMouseEvents`, `disableFlipByClick`) |
 | `renderScale` | `number` | `1.5` | Render quality multiplier (× capped devicePixelRatio) |
 | `renderRange` | `number` | `2` | Spreads kept rendered around the current one; `Infinity` renders all |

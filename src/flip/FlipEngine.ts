@@ -34,6 +34,12 @@ export interface FlipEngineOptions extends FlipEngineCallbacks {
   useMouseEvents?: boolean
   swipeDistance?: number
   disableFlipByClick?: boolean
+  /**
+   * The last entry in `pages` is a synthetic blank appended so an odd book
+   * ends on a lone back cover. It only exists for landscape pairing, so
+   * portrait spreads skip it entirely.
+   */
+  trailingBlank?: boolean
 }
 
 type Orientation = 'portrait' | 'landscape'
@@ -208,8 +214,14 @@ export class FlipEngine {
 
   /* ------------------------------------------------------- spreads & layout */
 
+  /** Pages the current orientation can show: portrait skips a trailing blank. */
+  private effectivePageCount(): number {
+    const total = this.pages.length
+    return this.opts.trailingBlank && this.orientation === 'portrait' ? total - 1 : total
+  }
+
   private clampPage(page: number): number {
-    return Math.min(Math.max(page, 1), Math.max(this.pages.length, 1))
+    return Math.min(Math.max(page, 1), Math.max(this.effectivePageCount(), 1))
   }
 
   private detectOrientation(): Orientation {
@@ -225,7 +237,7 @@ export class FlipEngine {
   }
 
   private computeSpreads(): number[][] {
-    const total = this.pages.length
+    const total = this.effectivePageCount()
     const spreads: number[][] = []
     if (this.orientation === 'portrait') {
       for (let p = 1; p <= total; p++) spreads.push([p])
@@ -713,7 +725,9 @@ export class FlipEngine {
     this.orientation = next
     this.applyStageSize()
     this.spreads = this.computeSpreads()
-    this.spreadIndex = this.spreadIndexForPage(page)
+    // Re-clamp for the new orientation: portrait drops a trailing blank, so a
+    // book resting on it must land on the last real page instead.
+    this.spreadIndex = this.spreadIndexForPage(this.clampPage(page))
     this.layout()
     this.opts.onOrientationChange?.(next)
   }
