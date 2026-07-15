@@ -10,7 +10,7 @@ import type {
 import { usePdfDocument } from '../composables/usePdfDocument'
 import { usePdfRenderer } from '../composables/usePdfRenderer'
 import { usePageFlip } from '../composables/usePageFlip'
-import { useFullscreen } from '../composables/useFullscreen'
+import { fullscreenSupported, useFullscreen } from '../composables/useFullscreen'
 import DefaultControls from './DefaultControls.vue'
 
 const props = withDefaults(defineProps<PdfFlipbookProps>(), {
@@ -21,6 +21,7 @@ const props = withDefaults(defineProps<PdfFlipbookProps>(), {
   showCover: true,
   renderScale: 1.5,
   renderRange: 2,
+  controlsPosition: 'bottom',
 })
 
 const emit = defineEmits<PdfFlipbookEmits>()
@@ -186,8 +187,11 @@ const singleShift = computed<string | null>(() => {
 
 const shiftDurationMs = computed(() => Math.max(0, props.flipOptions?.flippingTime ?? 800))
 
-const bookStyle = computed<Record<string, string>>(() => {
-  const style: Record<string, string> = {}
+/** Shared by the book and the first-page fullscreen hint so they stay aligned. */
+const shellStyle = computed<Record<string, string>>(() => {
+  // width:100% is required so percentage-sized stage children don't collapse
+  // when this shell is a flex item (fullscreen) with only max-width set.
+  const style: Record<string, string> = { position: 'relative', width: '100%' }
   if (animateShift.value && shiftDurationMs.value > 0) {
     style.transition = `transform ${shiftDurationMs.value}ms ease`
   }
@@ -200,6 +204,39 @@ const bookStyle = computed<Record<string, string>>(() => {
     style.maxWidth = `min(100%, calc((100vh - 6rem) * ${aspect}))`
     style.marginLeft = 'auto'
     style.marginRight = 'auto'
+  }
+  return style
+})
+
+/** Hover prompt on the first page — hidden once fullscreen or unsupported. */
+const showFullscreenHint = computed(
+  () => ready.value && currentPage.value === 1 && !isFullscreen.value && fullscreenSupported(),
+)
+
+/**
+ * Align the hint with page 1's slot: full in portrait, right for a lone cover,
+ * left when page 1 sits in a landscape spread.
+ */
+const fullscreenHintStyle = computed<Record<string, string>>(() => {
+  const style: Record<string, string> = {
+    position: 'absolute',
+    top: '0',
+    height: '100%',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    pointerEvents: 'none',
+    zIndex: '2',
+  }
+  if (orientation.value === 'portrait') {
+    style.left = '0'
+    style.width = '100%'
+  } else if (props.showCover) {
+    style.left = '50%'
+    style.width = '50%'
+  } else {
+    style.left = '0'
+    style.width = '50%'
   }
   return style
 })
@@ -245,6 +282,7 @@ defineExpose({
     :class="[containerClass, isFullscreen ? fullscreenClass : undefined]"
     :style="containerStyle"
     :data-fullscreen="isFullscreen ? '' : undefined"
+    :data-controls-position="controlsPosition"
     data-pdf-flipbook
   >
     <div v-if="error" class="vpf-error" :class="errorClass" data-pdf-flipbook-error>
@@ -260,17 +298,53 @@ defineExpose({
         <div>Loading&hellip;</div>
       </slot>
     </div>
-    <!-- Always rendered (v-show) so the flip engine's mount target exists during
-         setup. The engine owns everything inside; Vue must never render children here. -->
+    <slot v-if="ready && controlsPosition === 'top'" name="controls" v-bind="controlsCtx">
+      <DefaultControls
+        :current-page="controlsCtx.currentPage"
+        :total-pages="controlsCtx.totalPages"
+        :can-go-next="controlsCtx.canGoNext"
+        :can-go-prev="controlsCtx.canGoPrev"
+        :is-fullscreen="controlsCtx.isFullscreen"
+        :controls-class="controlsClass"
+        :button-class="buttonClass"
+        :page-indicator-class="pageIndicatorClass"
+        @next="next"
+        @prev="prev"
+        @toggle-fullscreen="controlsCtx.toggleFullscreen"
+      />
+    </slot>
+    <!-- Shell wraps the engine mount + first-page overlay. The engine owns
+         everything inside bookRef; Vue must never render children there. -->
     <div
       v-show="!error && !loading"
-      ref="bookRef"
-      class="vpf-book"
-      :class="bookClass"
-      :style="bookStyle"
-      data-pdf-flipbook-book
-    ></div>
-    <slot v-if="ready" name="controls" v-bind="controlsCtx">
+      class="vpf-book-shell"
+      :style="shellStyle"
+      data-pdf-flipbook-shell
+    >
+      <div
+        ref="bookRef"
+        class="vpf-book"
+        :class="bookClass"
+        data-pdf-flipbook-book
+      ></div>
+      <div
+        v-if="showFullscreenHint"
+        class="vpf-fullscreen-hint"
+        :style="fullscreenHintStyle"
+        data-pdf-flipbook-fullscreen-hint
+      >
+        <button
+          type="button"
+          class="vpf-button vpf-fullscreen-hint-button"
+          :class="buttonClass"
+          data-pdf-flipbook-fullscreen-hint-button
+          @click.stop="void fullscreen.enter()"
+        >
+          View in fullscreen
+        </button>
+      </div>
+    </div>
+    <slot v-if="ready && controlsPosition === 'bottom'" name="controls" v-bind="controlsCtx">
       <DefaultControls
         :current-page="controlsCtx.currentPage"
         :total-pages="controlsCtx.totalPages"

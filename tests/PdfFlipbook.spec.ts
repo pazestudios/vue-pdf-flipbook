@@ -52,6 +52,28 @@ describe('PdfFlipbook', () => {
     expect(wrapper.find('[data-pdf-flipbook-indicator]').classes()).toContain('font-mono')
   })
 
+  it('places controls above the book when controlsPosition is top', async () => {
+    const wrapper = mountBook({ controlsPosition: 'top' })
+    await whenReady(wrapper)
+    expect(wrapper.attributes('data-controls-position')).toBe('top')
+    const controls = wrapper.find('[data-pdf-flipbook-controls]').element
+    const shell = wrapper.find('[data-pdf-flipbook-shell]').element
+    expect(
+      Boolean(controls.compareDocumentPosition(shell) & Node.DOCUMENT_POSITION_FOLLOWING),
+    ).toBe(true)
+  })
+
+  it('places controls below the book by default', async () => {
+    const wrapper = mountBook()
+    await whenReady(wrapper)
+    expect(wrapper.attributes('data-controls-position')).toBe('bottom')
+    const controls = wrapper.find('[data-pdf-flipbook-controls]').element
+    const shell = wrapper.find('[data-pdf-flipbook-shell]').element
+    expect(
+      Boolean(shell.compareDocumentPosition(controls) & Node.DOCUMENT_POSITION_FOLLOWING),
+    ).toBe(true)
+  })
+
   it('renders a custom controls slot with working slot props', async () => {
     const wrapper = mountBook(
       {},
@@ -145,7 +167,7 @@ describe('PdfFlipbook', () => {
 
   describe('single-page centering (landscape)', () => {
     function bookTransform(wrapper: ReturnType<typeof mountBook>) {
-      return (wrapper.find('[data-pdf-flipbook-book]').element as HTMLElement).style.transform
+      return (wrapper.find('[data-pdf-flipbook-shell]').element as HTMLElement).style.transform
     }
 
     it('opens on a lone centered first page by default', async () => {
@@ -243,6 +265,40 @@ describe('PdfFlipbook', () => {
       root.requestFullscreen = vi.fn().mockResolvedValue(undefined)
       await wrapper.find('#fs').trigger('click')
       expect(root.requestFullscreen).toHaveBeenCalled()
+    })
+
+    it('shows a first-page fullscreen hint that enters fullscreen', async () => {
+      Object.defineProperty(document, 'fullscreenEnabled', {
+        value: true,
+        configurable: true,
+      })
+      const wrapper = mountBook({ buttonClass: 'hint-btn' })
+      await whenReady(wrapper)
+
+      const hint = wrapper.find('[data-pdf-flipbook-fullscreen-hint-button]')
+      expect(hint.exists()).toBe(true)
+      expect(hint.text()).toBe('View in fullscreen')
+      expect(hint.classes()).toContain('hint-btn')
+
+      const root = wrapper.element as HTMLElement & { requestFullscreen: () => Promise<void> }
+      root.requestFullscreen = vi.fn().mockResolvedValue(undefined)
+      await hint.trigger('click')
+      expect(root.requestFullscreen).toHaveBeenCalled()
+
+      setFullscreenElement(root)
+      await vi.waitFor(() =>
+        expect(wrapper.find('[data-pdf-flipbook-fullscreen-hint-button]').exists()).toBe(false),
+      )
+
+      setFullscreenElement(null)
+      await vi.waitFor(() =>
+        expect(wrapper.find('[data-pdf-flipbook-fullscreen-hint-button]').exists()).toBe(true),
+      )
+
+      ;(wrapper.vm as unknown as { goToPage: (p: number) => void }).goToPage(2)
+      await vi.waitFor(() =>
+        expect(wrapper.find('[data-pdf-flipbook-fullscreen-hint-button]').exists()).toBe(false),
+      )
     })
   })
 

@@ -7,6 +7,9 @@ export type PdfSource = string | URL | ArrayBuffer | Uint8Array
 /** Page display mode. `auto` switches between single-page and spread based on available width. */
 export type FlipMode = 'auto' | 'single' | 'spread'
 
+/** Where default (and slotted) controls render relative to the book. */
+export type ControlsPosition = 'top' | 'bottom'
+
 /** Tuning options for the built-in flip animation. */
 export interface FlipOptions {
   /** Flip animation duration in ms (default 800). 0 flips instantly. */
@@ -77,6 +80,8 @@ export interface PdfFlipbookProps {
    * current one. Use Infinity to render every page. Default 2.
    */
   renderRange?: number
+  /** Place controls above or below the book. Default `'bottom'`. */
+  controlsPosition?: ControlsPosition
 
   /* Headless styling hooks — pass Tailwind (or any) classes. */
   containerClass?: string

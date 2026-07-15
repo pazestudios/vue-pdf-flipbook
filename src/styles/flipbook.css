@@ -6,8 +6,37 @@
   position: relative;
 }
 
+[data-pdf-flipbook-shell],
 [data-pdf-flipbook-book] {
   width: 100%;
+}
+
+/* First-page "View in fullscreen" hint — visible on hover (or always on touch). */
+[data-pdf-flipbook-fullscreen-hint-button] {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  background: rgba(15, 23, 42, 0.8);
+  color: #fff;
+  border: none;
+  border-radius: 0.375rem;
+  font: inherit;
+  line-height: 1.25;
+}
+
+[data-pdf-flipbook-shell]:hover [data-pdf-flipbook-fullscreen-hint-button],
+[data-pdf-flipbook-fullscreen-hint-button]:focus-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+@media (hover: none) {
+  [data-pdf-flipbook-fullscreen-hint-button] {
+    opacity: 1;
+    pointer-events: auto;
+  }
 }
 
 [data-pdf-flipbook-page] {
@@ -20,6 +49,11 @@
   justify-content: center;
   gap: 0.75rem;
   margin-top: 0.75rem;
+}
+
+[data-pdf-flipbook][data-controls-position='top'] [data-pdf-flipbook-controls] {
+  margin-top: 0;
+  margin-bottom: 0.75rem;
 }
 
 [data-pdf-flipbook-prev],

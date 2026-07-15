@@ -120,6 +120,7 @@ Every internal element also carries a stable data attribute (`data-pdf-flipbook`
 | `flipOptions` | `FlipOptions` | — | Flip animation tuning (`flippingTime`, `drawShadow`, `maxShadowOpacity`, `swipeDistance`, `useMouseEvents`, `disableFlipByClick`) |
 | `renderScale` | `number` | `1.5` | Render quality multiplier (× capped devicePixelRatio) |
 | `renderRange` | `number` | `2` | Spreads kept rendered around the current one; `Infinity` renders all |
+| `controlsPosition` | `'top' \| 'bottom'` | `'bottom'` | Place controls above or below the book |
 | `containerClass`, `bookClass`, `pageClass`, `controlsClass`, `buttonClass`, `pageIndicatorClass`, `loadingClass`, `errorClass` | `string` | — | Class hooks for every element |
 | `fullscreenClass` | `string` | — | Extra classes applied to the container while fullscreen |
 

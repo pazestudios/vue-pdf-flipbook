@@ -44,6 +44,7 @@ function log(name: string, payload?: unknown) {
       :key="mode"
       :src="src"
       :mode="mode"
+      controls-position="top"
       container-class="rounded-xl bg-white p-6 shadow-lg"
       fullscreen-class="!bg-slate-900 !rounded-none"
       button-class="rounded-md bg-indigo-600 px-3 py-1 text-white hover:bg-indigo-500 disabled:opacity-40"
