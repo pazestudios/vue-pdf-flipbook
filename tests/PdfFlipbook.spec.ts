@@ -109,7 +109,26 @@ describe('PdfFlipbook', () => {
       expect(wrapper.emitted('page-changed')!.at(-1)![0]).toEqual({ page: 4, totalPages: 8 }),
     )
     expect(wrapper.emitted('flip-start')!.at(-1)![0]).toEqual({ fromPage: 1, toPage: 4 })
-    expect(wrapper.find('[data-pdf-flipbook-indicator]').text()).toBe('4 / 8')
+    expect(wrapper.find('[data-pdf-flipbook-indicator]').text()).toBe('4–5 / 8')
+  })
+
+  it('shows both pages of a landscape spread in the indicator', async () => {
+    const wrapper = mountBook()
+    await whenReady(wrapper)
+    expect(wrapper.find('[data-pdf-flipbook-indicator]').text()).toBe('1 / 8')
+    ;(wrapper.vm as unknown as { next: () => void }).next()
+    await vi.waitFor(() =>
+      expect(wrapper.find('[data-pdf-flipbook-indicator]').text()).toBe('2–3 / 8'),
+    )
+  })
+
+  it('shows a single page in the indicator when mode is single', async () => {
+    const wrapper = mountBook({ mode: 'single' })
+    await whenReady(wrapper)
+    ;(wrapper.vm as unknown as { goToPage: (p: number) => void }).goToPage(2)
+    await vi.waitFor(() =>
+      expect(wrapper.find('[data-pdf-flipbook-indicator]').text()).toBe('2 / 8'),
+    )
   })
 
   it('exposes navigation methods and state via template ref', async () => {

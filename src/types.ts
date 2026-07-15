@@ -35,6 +35,8 @@ export interface PageFlipInstance {
   getPageCount(): number
   /** First page of the current spread, 1-based. */
   getCurrentPage(): number
+  /** Pages currently visible in the spread, 1-based (one or two). */
+  getCurrentSpread(): number[]
   getOrientation(): 'portrait' | 'landscape'
   /** Re-measure the container and re-apply layout. */
   update(): void
@@ -108,7 +110,10 @@ export interface PdfFlipbookEmits {
 
 /** Slot props for the `controls` slot. */
 export interface ControlsSlotProps {
+  /** First page of the current spread, 1-based. */
   currentPage: number
+  /** Pages currently visible (one page, or both pages of a landscape spread). */
+  visiblePages: number[]
   totalPages: number
   next: () => void
   prev: () => void

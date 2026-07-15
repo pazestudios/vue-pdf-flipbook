@@ -57,7 +57,7 @@ function log(name: string, payload?: unknown) {
     >
       <template
         v-if="useCustomControls"
-        #controls="{ currentPage, totalPages, next, prev, canGoNext, canGoPrev, isFullscreen, toggleFullscreen }"
+        #controls="{ visiblePages, totalPages, next, prev, canGoNext, canGoPrev, isFullscreen, toggleFullscreen }"
       >
         <div class="mt-4 flex items-center justify-center gap-4">
           <button
@@ -68,7 +68,8 @@ function log(name: string, payload?: unknown) {
             ← Prev
           </button>
           <span class="rounded bg-slate-200 px-3 py-1 font-mono text-sm">
-            {{ currentPage }} / {{ totalPages }}
+            {{ visiblePages.length > 1 ? `${visiblePages[0]}–${visiblePages[1]}` : visiblePages[0] }}
+            / {{ totalPages }}
           </span>
           <button
             class="rounded-full bg-emerald-600 px-4 py-2 text-white shadow hover:bg-emerald-500 disabled:opacity-30"

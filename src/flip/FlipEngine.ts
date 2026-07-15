@@ -138,6 +138,11 @@ export class FlipEngine {
     return this.spreads[this.spreadIndex]?.[0] ?? 1
   }
 
+  /** Pages currently visible in the spread, 1-based (one or two). */
+  getCurrentSpread(): number[] {
+    return [...(this.spreads[this.spreadIndex] ?? [1])]
+  }
+
   getOrientation(): Orientation {
     return this.orientation
   }
@@ -177,7 +182,9 @@ export class FlipEngine {
     const width = this.root.clientWidth || this.root.getBoundingClientRect().width
     // Unmeasurable container (hidden, or non-layout test DOM): assume wide.
     if (!width) return 'landscape'
-    const minWidth = this.opts.minWidth ?? this.opts.pageWidth / 4
+    // Need room for two pages at least ~half the base page width each
+    // (default pageWidth 550 → switch below ~550px, i.e. typical phones).
+    const minWidth = this.opts.minWidth ?? this.opts.pageWidth / 2
     return width >= minWidth * 2 ? 'landscape' : 'portrait'
   }
 

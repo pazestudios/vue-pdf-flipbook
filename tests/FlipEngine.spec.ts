@@ -40,9 +40,12 @@ describe('FlipEngine', () => {
   })
 
   it('shows a lone cover on the right half when showCover is set', () => {
-    const { pages } = makeEngine({ showCover: true })
+    const { pages, engine } = makeEngine({ showCover: true })
     expect(visiblePages(pages)).toEqual([1])
+    expect(engine.getCurrentSpread()).toEqual([1])
     expect(pages[0]!.style.left).toBe('50%')
+    engine.flipNext()
+    expect(engine.getCurrentSpread()).toEqual([2, 3])
   })
 
   it('shows one full-width page in single mode', () => {
@@ -54,6 +57,24 @@ describe('FlipEngine', () => {
     engine.flipNext()
     expect(engine.getCurrentPage()).toBe(2)
     expect(visiblePages(pages)).toEqual([2])
+  })
+
+  it('auto mode uses portrait on narrow containers (mobile)', () => {
+    const { root, pages, engine } = makeEngine({ mode: 'auto' })
+    Object.defineProperty(root, 'clientWidth', { configurable: true, value: 390 })
+    engine.update()
+    expect(engine.getOrientation()).toBe('portrait')
+    expect(visiblePages(pages)).toEqual([1])
+    expect(pages[0]!.style.width).toBe('100%')
+  })
+
+  it('auto mode uses landscape when the container fits two pages', () => {
+    const { root, pages, engine } = makeEngine({ mode: 'auto', showCover: true })
+    Object.defineProperty(root, 'clientWidth', { configurable: true, value: 900 })
+    engine.update()
+    expect(engine.getOrientation()).toBe('landscape')
+    expect(visiblePages(pages)).toEqual([1])
+    expect(pages[0]!.style.left).toBe('50%')
   })
 
   it('flips forward and backward through spreads', () => {

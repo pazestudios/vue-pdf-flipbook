@@ -30,6 +30,8 @@ const rootRef = ref<HTMLElement | null>(null)
 const bookRef = ref<HTMLElement | null>(null)
 const ready = ref(false)
 const currentPage = ref(1)
+/** Pages currently visible in the spread (one, or both of a landscape pair). */
+const visiblePages = ref<number[]>([1])
 /** Page used for cover/back-cover centering; updates at flip-start so the shift runs with the flip. */
 const shiftPage = ref(1)
 const orientation = ref<'portrait' | 'landscape'>('landscape')
@@ -52,8 +54,8 @@ const { pdf, totalPages, loading, progress, error, load, teardown } = usePdfDocu
 
 const flip = usePageFlip({
   onFlip(page) {
-    currentPage.value = page
-    shiftPage.value = page
+    syncSpreadFromEngine()
+    shiftPage.value = currentPage.value
     renderer.updateWindow(page)
     emit('page-changed', { page, totalPages: totalPages.value })
   },
@@ -64,9 +66,19 @@ const flip = usePageFlip({
   },
   onOrientationChange(value) {
     orientation.value = value
+    // Portrait ↔ landscape rebuilds spreads; re-read so the indicator stays exact.
+    syncSpreadFromEngine()
+    renderer.updateWindow(currentPage.value)
     emit('orientation-changed', value)
   },
 })
+
+function syncSpreadFromEngine(): void {
+  const spread = flip.getInstance()?.getCurrentSpread()
+  if (!spread?.length) return
+  currentPage.value = spread[0]!
+  visiblePages.value = spread
+}
 
 const renderer = usePdfRenderer({
   renderScale: () => props.renderScale,
@@ -126,7 +138,7 @@ async function setup(): Promise<void> {
 
   renderer.setDocument(doc)
   pages.forEach((page, i) => renderer.registerCanvas(i + 1, page.canvas))
-  currentPage.value = Math.min(Math.max(props.startPage, 1), doc.numPages)
+  syncSpreadFromEngine()
   shiftPage.value = currentPage.value
   pageDims.value = { width: pageWidth, height: pageHeight }
   orientation.value = flip.getInstance()?.getOrientation() ?? orientation.value
@@ -249,6 +261,7 @@ const containerStyle = computed<Record<string, string> | undefined>(() =>
 
 const controlsCtx = computed<ControlsSlotProps>(() => ({
   currentPage: currentPage.value,
+  visiblePages: visiblePages.value,
   totalPages: totalPages.value,
   next,
   prev,
@@ -301,6 +314,7 @@ defineExpose({
     <slot v-if="ready && controlsPosition === 'top'" name="controls" v-bind="controlsCtx">
       <DefaultControls
         :current-page="controlsCtx.currentPage"
+        :visible-pages="controlsCtx.visiblePages"
         :total-pages="controlsCtx.totalPages"
         :can-go-next="controlsCtx.canGoNext"
         :can-go-prev="controlsCtx.canGoPrev"
@@ -347,6 +361,7 @@ defineExpose({
     <slot v-if="ready && controlsPosition === 'bottom'" name="controls" v-bind="controlsCtx">
       <DefaultControls
         :current-page="controlsCtx.currentPage"
+        :visible-pages="controlsCtx.visiblePages"
         :total-pages="controlsCtx.totalPages"
         :can-go-next="controlsCtx.canGoNext"
         :can-go-prev="controlsCtx.canGoPrev"

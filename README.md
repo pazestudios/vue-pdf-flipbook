@@ -85,10 +85,13 @@ Or replace the controls entirely with the `controls` slot:
 
 ```vue
 <PdfFlipbook src="/document.pdf">
-  <template #controls="{ currentPage, totalPages, next, prev, canGoNext, canGoPrev }">
+  <template #controls="{ visiblePages, totalPages, next, prev, canGoNext, canGoPrev }">
     <div class="mt-4 flex items-center justify-center gap-4">
       <button class="btn" :disabled="!canGoPrev" @click="prev">← Prev</button>
-      <span>{{ currentPage }} / {{ totalPages }}</span>
+      <span>
+        {{ visiblePages.length > 1 ? `${visiblePages[0]}–${visiblePages[1]}` : visiblePages[0] }}
+        / {{ totalPages }}
+      </span>
       <button class="btn" :disabled="!canGoNext" @click="next">Next →</button>
     </div>
   </template>
@@ -140,7 +143,7 @@ Every internal element also carries a stable data attribute (`data-pdf-flipbook`
 
 | Slot | Slot props |
 |---|---|
-| `controls` | `{ currentPage, totalPages, next, prev, goToPage, canGoNext, canGoPrev, isFullscreen, toggleFullscreen }` |
+| `controls` | `{ currentPage, visiblePages, totalPages, next, prev, goToPage, canGoNext, canGoPrev, isFullscreen, toggleFullscreen }` — `visiblePages` is the one or two pages currently shown |
 | `loading` | `{ progress }` (0–1) |
 | `error` | `{ error, retry }` |
 

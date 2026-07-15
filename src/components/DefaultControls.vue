@@ -1,8 +1,11 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import { fullscreenSupported } from '../composables/useFullscreen'
 
-defineProps<{
+const props = defineProps<{
   currentPage: number
+  /** Pages currently visible; when length is 2, the indicator shows a range. */
+  visiblePages?: number[]
   totalPages: number
   canGoNext: boolean
   canGoPrev: boolean
@@ -19,6 +22,12 @@ defineEmits<{
 }>()
 
 const showFullscreen = fullscreenSupported()
+
+const pageLabel = computed(() => {
+  const pages = props.visiblePages?.length ? props.visiblePages : [props.currentPage]
+  if (pages.length >= 2) return `${pages[0]}–${pages[pages.length - 1]}`
+  return String(pages[0] ?? props.currentPage)
+})
 </script>
 
 <template>
@@ -35,7 +44,7 @@ const showFullscreen = fullscreenSupported()
       &lsaquo;
     </button>
     <span class="vpf-indicator" :class="pageIndicatorClass" data-pdf-flipbook-indicator>
-      {{ currentPage }} / {{ totalPages }}
+      {{ pageLabel }} / {{ totalPages }}
     </span>
     <button
       type="button"
