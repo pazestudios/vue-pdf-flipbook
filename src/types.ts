@@ -84,6 +84,12 @@ export interface PdfFlipbookProps {
   renderRange?: number
   /** Place controls above or below the book. Default `'bottom'`. */
   controlsPosition?: ControlsPosition
+  /**
+   * Maximum pinch/scroll zoom level (1 = fit). Zoom in with a touch pinch,
+   * trackpad pinch, or the mouse wheel over the book; drag to pan while
+   * zoomed. Set to 1 to disable zooming. Default 2.
+   */
+  maxZoom?: number
 
   /* Headless styling hooks — pass Tailwind (or any) classes. */
   containerClass?: string
@@ -106,6 +112,7 @@ export interface PdfFlipbookEmits {
   (e: 'orientation-changed', orientation: 'portrait' | 'landscape'): void
   (e: 'rendered', payload: { page: number }): void
   (e: 'fullscreen-changed', isFullscreen: boolean): void
+  (e: 'zoom-changed', zoom: number): void
 }
 
 /** Slot props for the `controls` slot. */
@@ -122,6 +129,11 @@ export interface ControlsSlotProps {
   canGoPrev: boolean
   isFullscreen: boolean
   toggleFullscreen: () => void
+  /** Current zoom level (1 = fit). */
+  zoom: number
+  /** Set the zoom level (clamped to [1, maxZoom]), centered on the viewport. */
+  setZoom: (level: number) => void
+  resetZoom: () => void
 }
 
 /** Methods and state exposed via template ref. */
@@ -138,6 +150,11 @@ export interface PdfFlipbookExpose {
   toggleFullscreen: () => Promise<void>
   getPdfDocument: () => PDFDocumentProxy | null
   getFlipInstance: () => PageFlipInstance | null
+  /** Current zoom level (1 = fit). */
+  zoom: Readonly<Ref<number>>
+  /** Set the zoom level (clamped to [1, maxZoom]), centered on the viewport. */
+  setZoom: (level: number) => void
+  resetZoom: () => void
 }
 
 export interface PluginOptions {

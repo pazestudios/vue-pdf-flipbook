@@ -12,6 +12,7 @@ A **headless Vue 3 component** that renders a PDF as an interactive flipbook wit
 - ⚡ Lazy page rendering with a priority queue — handles large PDFs
 - 📱 Responsive with automatic single-page/spread switching
 - 🎯 Lone pages (cover/back cover) are automatically centered
+- 🔍 Pinch & scroll zoom (up to `maxZoom`, default 2×) with drag-to-pan
 - ⛶ Built-in fullscreen mode
 - 🔒 SSR-safe (Nuxt): browser-only libraries load in `onMounted`
 - 🟦 Written in TypeScript, full type declarations included
@@ -98,7 +99,7 @@ Or replace the controls entirely with the `controls` slot:
 </PdfFlipbook>
 ```
 
-Every internal element also carries a stable data attribute (`data-pdf-flipbook`, `-book`, `-page`, `-canvas`, `-controls`, `-prev`, `-next`, `-indicator`, `-loading`, `-error`), so Tailwind arbitrary variants work too:
+Every internal element also carries a stable data attribute (`data-pdf-flipbook`, `-viewport`, `-book`, `-page`, `-canvas`, `-controls`, `-prev`, `-next`, `-indicator`, `-loading`, `-error`), so Tailwind arbitrary variants work too:
 
 ```html
 <div class="[&_[data-pdf-flipbook-page]]:rounded-lg [&_[data-pdf-flipbook-page]]:shadow-md">
@@ -124,6 +125,7 @@ Every internal element also carries a stable data attribute (`data-pdf-flipbook`
 | `renderScale` | `number` | `1.5` | Render quality multiplier (× capped devicePixelRatio) |
 | `renderRange` | `number` | `2` | Spreads kept rendered around the current one; `Infinity` renders all |
 | `controlsPosition` | `'top' \| 'bottom'` | `'bottom'` | Place controls above or below the book |
+| `maxZoom` | `number` | `2` | Maximum pinch/scroll zoom level; `1` disables zooming |
 | `containerClass`, `bookClass`, `pageClass`, `controlsClass`, `buttonClass`, `pageIndicatorClass`, `loadingClass`, `errorClass` | `string` | — | Class hooks for every element |
 | `fullscreenClass` | `string` | — | Extra classes applied to the container while fullscreen |
 
@@ -138,12 +140,13 @@ Every internal element also carries a stable data attribute (`data-pdf-flipbook`
 | `orientation-changed` | `'portrait' \| 'landscape'` |
 | `rendered` | `{ page }` — a page finished rendering |
 | `fullscreen-changed` | `boolean` |
+| `zoom-changed` | `number` — current zoom level (1 = fit) |
 
 ## Slots
 
 | Slot | Slot props |
 |---|---|
-| `controls` | `{ currentPage, visiblePages, totalPages, next, prev, goToPage, canGoNext, canGoPrev, isFullscreen, toggleFullscreen }` — `visiblePages` is the one or two pages currently shown |
+| `controls` | `{ currentPage, visiblePages, totalPages, next, prev, goToPage, canGoNext, canGoPrev, isFullscreen, toggleFullscreen, zoom, setZoom, resetZoom }` — `visiblePages` is the one or two pages currently shown |
 | `loading` | `{ progress }` (0–1) |
 | `error` | `{ error, retry }` |
 
@@ -158,6 +161,7 @@ const book = useTemplateRef<PdfFlipbookExpose>('book')
 // book.value.next() / .prev() / .goToPage(5) / .reload()
 // book.value.currentPage / .totalPages
 // book.value.enterFullscreen() / .exitFullscreen() / .toggleFullscreen() / .isFullscreen
+// book.value.zoom / .setZoom(1.5) / .resetZoom()
 // book.value.getPdfDocument() / .getFlipInstance()
 </script>
 
@@ -173,6 +177,10 @@ The default controls include a fullscreen toggle (hidden when the browser doesn'
 ```vue
 <PdfFlipbook src="/document.pdf" fullscreen-class="!bg-slate-900 !rounded-none" />
 ```
+
+## Zoom
+
+Zoom in with a touch pinch, trackpad pinch, or the mouse wheel over the book (up to `maxZoom`, default 2×). While zoomed, dragging pans the page instead of flipping it — the prev/next controls still work and keep the zoom. Zooming stays sharp because pages are pre-rendered above CSS size (`renderScale`). Programmatic control: `setZoom(level)` / `resetZoom()` via the template ref or the `controls` slot, plus a `zoom-changed` event. Set `:max-zoom="1"` to disable zooming.
 
 ## SSR / Nuxt
 

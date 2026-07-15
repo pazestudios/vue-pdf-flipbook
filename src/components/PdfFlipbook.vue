@@ -10,6 +10,7 @@ import type {
 import { usePdfDocument } from '../composables/usePdfDocument'
 import { usePdfRenderer } from '../composables/usePdfRenderer'
 import { usePageFlip } from '../composables/usePageFlip'
+import { useZoom } from '../composables/useZoom'
 import { fullscreenSupported, useFullscreen } from '../composables/useFullscreen'
 import DefaultControls from './DefaultControls.vue'
 
@@ -22,11 +23,13 @@ const props = withDefaults(defineProps<PdfFlipbookProps>(), {
   renderScale: 1.5,
   renderRange: 2,
   controlsPosition: 'bottom',
+  maxZoom: 2,
 })
 
 const emit = defineEmits<PdfFlipbookEmits>()
 
 const rootRef = ref<HTMLElement | null>(null)
+const viewportRef = ref<HTMLElement | null>(null)
 const bookRef = ref<HTMLElement | null>(null)
 const ready = ref(false)
 const currentPage = ref(1)
@@ -51,6 +54,11 @@ const isFullscreen = fullscreen.isFullscreen
 const animateShift = ref(false)
 
 const { pdf, totalPages, loading, progress, error, load, teardown } = usePdfDocument()
+
+const zoom = useZoom(() => viewportRef.value, {
+  maxZoom: () => props.maxZoom,
+  onChange: (level) => emit('zoom-changed', level),
+})
 
 const flip = usePageFlip({
   onFlip(page) {
@@ -93,6 +101,7 @@ async function setup(): Promise<void> {
   const my = ++setupEpoch
   ready.value = false
   animateShift.value = false
+  zoom.reset()
   renderer.reset()
   flip.destroy()
 
@@ -160,10 +169,12 @@ function destroyAll(): void {
 
 onMounted(() => {
   fullscreen.listen()
+  zoom.listen()
   void setup()
 })
 onBeforeUnmount(() => {
   fullscreen.unlisten()
+  zoom.unlisten()
   destroyAll()
 })
 watch(
@@ -220,9 +231,27 @@ const shellStyle = computed<Record<string, string>>(() => {
   return style
 })
 
-/** Hover prompt on the first page — hidden once fullscreen or unsupported. */
+/**
+ * Zoom viewport: clips the scaled book while zoomed in. Overflow stays
+ * visible at zoom 1 so the 3D projection of a mid-flip leaf is never cut off.
+ */
+const zoomViewportStyle = computed<Record<string, string>>(() => ({
+  position: 'relative',
+  width: '100%',
+  overflow: zoom.zoom.value > 1 ? 'hidden' : 'visible',
+}))
+
+/**
+ * Hover prompt on the first page — hidden once fullscreen or unsupported,
+ * and while zoomed in (clicks are captured for panning then).
+ */
 const showFullscreenHint = computed(
-  () => ready.value && currentPage.value === 1 && !isFullscreen.value && fullscreenSupported(),
+  () =>
+    ready.value &&
+    currentPage.value === 1 &&
+    !isFullscreen.value &&
+    zoom.zoom.value === 1 &&
+    fullscreenSupported(),
 )
 
 /**
@@ -270,6 +299,9 @@ const controlsCtx = computed<ControlsSlotProps>(() => ({
   canGoPrev: currentPage.value > 1,
   isFullscreen: isFullscreen.value,
   toggleFullscreen: () => void fullscreen.toggle(),
+  zoom: zoom.zoom.value,
+  setZoom: zoom.setZoom,
+  resetZoom: zoom.reset,
 }))
 
 defineExpose({
@@ -285,6 +317,9 @@ defineExpose({
   toggleFullscreen: fullscreen.toggle,
   getPdfDocument: (): PDFDocumentProxy | null => pdf.value,
   getFlipInstance: (): PageFlipInstance | null => flip.getInstance(),
+  zoom: readonly(zoom.zoom),
+  setZoom: zoom.setZoom,
+  resetZoom: zoom.reset,
 })
 </script>
 
@@ -327,35 +362,46 @@ defineExpose({
         @toggle-fullscreen="controlsCtx.toggleFullscreen"
       />
     </slot>
-    <!-- Shell wraps the engine mount + first-page overlay. The engine owns
-         everything inside bookRef; Vue must never render children there. -->
+    <!-- Zoom viewport clips the book while zoomed; its content wrapper takes
+         the pinch/scroll zoom transform. The shell inside wraps the engine
+         mount + first-page overlay. The engine owns everything inside
+         bookRef; Vue must never render children there. -->
     <div
       v-show="!error && !loading"
-      class="vpf-book-shell"
-      :style="shellStyle"
-      data-pdf-flipbook-shell
+      ref="viewportRef"
+      class="vpf-zoom-viewport"
+      :style="zoomViewportStyle"
+      data-pdf-flipbook-viewport
     >
-      <div
-        ref="bookRef"
-        class="vpf-book"
-        :class="bookClass"
-        data-pdf-flipbook-book
-      ></div>
-      <div
-        v-if="showFullscreenHint"
-        class="vpf-fullscreen-hint"
-        :style="fullscreenHintStyle"
-        data-pdf-flipbook-fullscreen-hint
-      >
-        <button
-          type="button"
-          class="vpf-button vpf-fullscreen-hint-button"
-          :class="buttonClass"
-          data-pdf-flipbook-fullscreen-hint-button
-          @click.stop="void fullscreen.enter()"
+      <div class="vpf-zoom-content" :style="zoom.contentStyle.value" data-pdf-flipbook-zoom>
+        <div
+          class="vpf-book-shell"
+          :style="shellStyle"
+          data-pdf-flipbook-shell
         >
-          View in fullscreen
-        </button>
+          <div
+            ref="bookRef"
+            class="vpf-book"
+            :class="bookClass"
+            data-pdf-flipbook-book
+          ></div>
+          <div
+            v-if="showFullscreenHint"
+            class="vpf-fullscreen-hint"
+            :style="fullscreenHintStyle"
+            data-pdf-flipbook-fullscreen-hint
+          >
+            <button
+              type="button"
+              class="vpf-button vpf-fullscreen-hint-button"
+              :class="buttonClass"
+              data-pdf-flipbook-fullscreen-hint-button
+              @click.stop="void fullscreen.enter()"
+            >
+              View in fullscreen
+            </button>
+          </div>
+        </div>
       </div>
     </div>
     <slot v-if="ready && controlsPosition === 'bottom'" name="controls" v-bind="controlsCtx">

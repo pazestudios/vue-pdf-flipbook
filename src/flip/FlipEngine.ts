@@ -444,11 +444,17 @@ export class FlipEngine {
   }
 
   private handlePointerDown = (e: PointerEvent): void => {
+    // A second touch means a multi-finger gesture (pinch zoom) — never a swipe.
+    if (!e.isPrimary) {
+      this.pointerStart = null
+      return
+    }
     this.suppressClick = false
     this.pointerStart = { x: e.clientX, y: e.clientY }
   }
 
   private handlePointerUp = (e: PointerEvent): void => {
+    if (!e.isPrimary) return
     const start = this.pointerStart
     this.pointerStart = null
     if (!start) return
