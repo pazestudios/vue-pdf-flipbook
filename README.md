@@ -19,11 +19,21 @@ A **headless Vue 3 component** that renders a PDF as an interactive flipbook wit
 
 ## Installation
 
+From npm (when published):
+
 ```bash
 npm install vue-pdf-flipbook
+# or
+pnpm add vue-pdf-flipbook
 ```
 
-Requires Vue `^3.4`. The package is ESM-only.
+From GitHub (no npm publish required). Prefer a tag so installs stay pinned:
+
+```bash
+pnpm add github:YOUR_ORG/vue-pdf-flipbook#v0.1.0
+```
+
+Git installs run the package `prepare` script, which builds `dist/` automatically. Requires Vue `^3.4`. The package is ESM-only.
 
 ## Quick start
 

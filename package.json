@@ -38,7 +38,8 @@
     "typecheck": "vue-tsc --noEmit -p tsconfig.build.json",
     "test": "vitest run",
     "test:watch": "vitest",
-    "prepublishOnly": "npm run typecheck && npm run test && npm run build"
+    "prepare": "vite build",
+    "prepublishOnly": "npm run typecheck && npm run test"
   },
   "peerDependencies": {
     "vue": "^3.4.0"
