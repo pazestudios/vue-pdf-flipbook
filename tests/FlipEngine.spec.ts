@@ -152,6 +152,98 @@ describe('FlipEngine', () => {
     }
   })
 
+  it('shows a half-width book shadow and binding gradient while closed on the cover', () => {
+    const { root } = makeEngine({ showCover: true })
+    const shadow = root.querySelector<HTMLElement>('.vpf-book-shadow')!
+    const coverSpine = root.querySelector<HTMLElement>('.vpf-cover-spine')!
+    const spine = root.querySelector<HTMLElement>('.vpf-book-spine')!
+    expect(shadow.style.left).toBe('50%')
+    expect(shadow.style.width).toBe('50%')
+    expect(shadow.style.opacity).toBe('1')
+    expect(coverSpine.style.opacity).toBe('1')
+    expect(spine.style.opacity).toBe('0')
+  })
+
+  it('shows a full-width shadow, center spine and page-bend overlays when open', () => {
+    const { root, engine } = makeEngine({ showCover: true })
+    engine.flipNext()
+    const shadow = root.querySelector<HTMLElement>('.vpf-book-shadow')!
+    expect(shadow.style.left).toBe('0%')
+    expect(shadow.style.width).toBe('100%')
+    expect(root.querySelector<HTMLElement>('.vpf-book-spine')!.style.opacity).toBe('1')
+    expect(root.querySelector<HTMLElement>('.vpf-page-bend-left')!.style.opacity).toBe('1')
+    expect(root.querySelector<HTMLElement>('.vpf-page-bend-right')!.style.opacity).toBe('1')
+    expect(root.querySelector<HTMLElement>('.vpf-cover-spine')!.style.opacity).toBe('0')
+  })
+
+  it('moves the binding gradient to the back cover at the end of the book', () => {
+    const { root, engine } = makeEngine({ pages: makePages(5) })
+    engine.flip(5)
+    const shadow = root.querySelector<HTMLElement>('.vpf-book-shadow')!
+    const coverSpine = root.querySelector<HTMLElement>('.vpf-cover-spine')!
+    expect(shadow.style.left).toBe('0%')
+    expect(shadow.style.width).toBe('50%')
+    expect(coverSpine.style.opacity).toBe('1')
+    expect(coverSpine.style.left).toBe('0%')
+  })
+
+  it('hides spine and bend overlays in portrait, keeping the full shadow', () => {
+    const { root } = makeEngine({ mode: 'single' })
+    const shadow = root.querySelector<HTMLElement>('.vpf-book-shadow')!
+    expect(shadow.style.left).toBe('0%')
+    expect(shadow.style.width).toBe('100%')
+    expect(root.querySelector<HTMLElement>('.vpf-book-spine')!.style.opacity).toBe('0')
+    expect(root.querySelector<HTMLElement>('.vpf-page-bend-left')!.style.opacity).toBe('0')
+    expect(root.querySelector<HTMLElement>('.vpf-cover-spine')!.style.opacity).toBe('0')
+  })
+
+  it('keeps the shadow on the cover half until the leaf actually covers the other half', async () => {
+    vi.useFakeTimers()
+    const raf = vi
+      .spyOn(globalThis, 'requestAnimationFrame')
+      .mockImplementation((cb) => setTimeout(() => cb(performance.now()), 16) as unknown as number)
+    try {
+      const { root, engine } = makeEngine({ showCover: true, flippingTime: 200 })
+      const shadow = root.querySelector<HTMLElement>('.vpf-book-shadow')!
+      engine.flipNext()
+      // Early in the flip the leaf has not crossed the spine yet: the shadow
+      // must still cover only the right (cover) half, not the full width.
+      await vi.advanceTimersByTimeAsync(32)
+      expect(shadow.style.left).toBe('50%')
+      expect(shadow.style.width).toBe('50%')
+      await vi.advanceTimersByTimeAsync(400)
+      expect(shadow.style.left).toBe('0%')
+      expect(shadow.style.width).toBe('100%')
+    } finally {
+      raf.mockRestore()
+      vi.useRealTimers()
+    }
+  })
+
+  it('keeps gutter shading on both faces of the moving leaf, removed when it lands', async () => {
+    vi.useFakeTimers()
+    const raf = vi
+      .spyOn(globalThis, 'requestAnimationFrame')
+      .mockImplementation((cb) => setTimeout(() => cb(performance.now()), 16) as unknown as number)
+    try {
+      const { root, engine } = makeEngine({ flippingTime: 100 })
+      engine.flipNext()
+      expect(root.querySelectorAll('.vpf-leaf-bend').length).toBe(2)
+      await vi.advanceTimersByTimeAsync(300)
+      expect(root.querySelectorAll('.vpf-leaf-bend').length).toBe(0)
+    } finally {
+      raf.mockRestore()
+      vi.useRealTimers()
+    }
+  })
+
+  it('renders no book chrome when drawShadow is false', () => {
+    const { root } = makeEngine({ drawShadow: false })
+    expect(root.querySelector('.vpf-book-shadow')).toBeNull()
+    expect(root.querySelector('.vpf-book-spine')).toBeNull()
+    expect(root.querySelector('.vpf-page-bend-left')).toBeNull()
+  })
+
   it('destroy removes everything from the mount element', () => {
     const { root, engine } = makeEngine()
     expect(root.children.length).toBe(1)

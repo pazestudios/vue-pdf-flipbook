@@ -28,6 +28,7 @@ export interface FlipEngineOptions extends FlipEngineCallbacks {
   maxHeight?: number
   /** Flip animation duration in ms. 0 flips instantly. Default 800. */
   flippingTime?: number
+  /** Draw the flip-leaf shadow and the book chrome (drop shadow, spine, page bend). Default true. */
   drawShadow?: boolean
   maxShadowOpacity?: number
   useMouseEvents?: boolean
@@ -38,13 +39,46 @@ export interface FlipEngineOptions extends FlipEngineCallbacks {
 type Orientation = 'portrait' | 'landscape'
 type Slot = 'left' | 'right' | 'full'
 
+/**
+ * Decorative overlays that make the stage read as a physical book: a drop
+ * shadow under the book's current footprint, a gutter spine when open, a
+ * binding-edge gradient when closed, and per-page bend shading.
+ */
+interface ChromeElements {
+  shadow: HTMLElement
+  spine: HTMLElement
+  bendLeft: HTMLElement
+  bendRight: HTMLElement
+  coverSpine: HTMLElement
+}
+
+/** Resolved chrome appearance for one spread; interpolated during flips. */
+interface ChromeState {
+  /** Book-shadow footprint as stage-width fractions. */
+  shadowLeft: number
+  shadowWidth: number
+  shadowOpacity: number
+  spineOpacity: number
+  bendOpacity: number
+  bendLeftBg: string
+  bendRightBg: string
+  coverSpineOpacity: number
+  coverSpineLeft: number
+  coverSpineBg: string
+}
+
 interface ActiveFlip {
   leaf: HTMLElement
   movedPages: HTMLElement[]
   shadows: HTMLElement[]
+  chrome: ((eased: number) => void) | null
   targetSpread: number
   endAngle: number
   raf: number
+}
+
+function pct(v: number): string {
+  return `${+(v * 100).toFixed(2)}%`
 }
 
 function easeInOutQuad(t: number): number {
@@ -67,6 +101,7 @@ export class FlipEngine {
   private readonly opts: FlipEngineOptions
 
   private orientation: Orientation
+  private chrome: ChromeElements | null = null
   private spreads: number[][] = []
   private spreadIndex = 0
   private anim: ActiveFlip | null = null
@@ -93,6 +128,7 @@ export class FlipEngine {
     }
     root.appendChild(this.stage)
 
+    if (options.drawShadow !== false) this.chrome = this.buildChrome()
     this.orientation = this.detectOrientation()
     this.applyStageSize()
     this.spreads = this.computeSpreads()
@@ -253,11 +289,212 @@ export class FlipEngine {
     if (this.orientation === 'portrait') {
       const page = this.spreads[this.spreadIndex]?.[0]
       if (page) this.showAt(page, 'full')
+      this.updateChrome(this.spreadIndex)
       return
     }
     const { left, right } = this.slotPages(this.spreadIndex)
     if (left) this.showAt(left, 'left')
     if (right) this.showAt(right, 'right')
+    this.updateChrome(this.spreadIndex)
+  }
+
+  /* ------------------------------------------------------------ book chrome */
+
+  private buildChrome(): ChromeElements {
+    const make = (className: string): HTMLElement => {
+      const el = document.createElement('div')
+      el.className = className
+      const s = el.style
+      s.position = 'absolute'
+      s.top = '0'
+      s.height = '100%'
+      s.pointerEvents = 'none'
+      s.opacity = '0'
+      return el
+    }
+    // The shadow sits behind the pages (first child, painted under later
+    // siblings); during flips its footprint is re-derived every frame so it
+    // never leads or trails the rotating leaf. The overlays sit above the
+    // pages but below a flipping leaf.
+    const shadow = make('vpf-book-shadow')
+    shadow.style.boxShadow = [
+      '0 0 4px rgba(0, 0, 0, 0.12)',
+      '0 4px 10px rgba(0, 0, 0, 0.16)',
+      '0 14px 28px rgba(0, 0, 0, 0.2)',
+      '0 28px 56px rgba(0, 0, 0, 0.16)',
+    ].join(', ')
+    const spine = make('vpf-book-spine')
+    spine.style.left = '47%'
+    spine.style.width = '6%'
+    spine.style.background =
+      'linear-gradient(to right, rgba(0,0,0,0) 0%, rgba(0,0,0,0.14) 35%, ' +
+      'rgba(0,0,0,0.28) 50%, rgba(0,0,0,0.14) 65%, rgba(0,0,0,0) 100%)'
+    const bendLeft = make('vpf-page-bend vpf-page-bend-left')
+    bendLeft.style.left = '0'
+    bendLeft.style.width = '50%'
+    const bendRight = make('vpf-page-bend vpf-page-bend-right')
+    bendRight.style.left = '50%'
+    bendRight.style.width = '50%'
+    const coverSpine = make('vpf-cover-spine')
+    coverSpine.style.width = '50%'
+    for (const el of [spine, bendLeft, bendRight, coverSpine]) el.style.zIndex = '3'
+    this.stage.insertBefore(shadow, this.stage.firstChild)
+    this.stage.append(spine, bendLeft, bendRight, coverSpine)
+    return { shadow, spine, bendLeft, bendRight, coverSpine }
+  }
+
+  /**
+   * Shading that makes a page look like it bends down into the gutter:
+   * a shadow that deepens toward the spine, then a faint highlight where the
+   * paper crests back up. `k` scales the whole effect (0..1).
+   */
+  private static bendGradient(side: 'left' | 'right', k: number): string {
+    const a = (v: number): string => (v * k).toFixed(3)
+    const dir = side === 'left' ? 'to left' : 'to right'
+    return (
+      `linear-gradient(${dir}, rgba(0,0,0,${a(0.22)}) 0%, rgba(0,0,0,${a(0.06)}) 5%, ` +
+      `rgba(255,255,255,${a(0.1)}) 8%, rgba(255,255,255,0) 16%)`
+    )
+  }
+
+  /** Binding-edge shading for a closed book: dark crease, highlight, falloff. */
+  private static closedSpineGradient(dir: 'to right' | 'to left'): string {
+    return (
+      `linear-gradient(${dir}, rgba(0,0,0,0.28) 0%, rgba(0,0,0,0.1) 0.8%, ` +
+      `rgba(255,255,255,0.1) 1.8%, rgba(0,0,0,0.05) 2.8%, rgba(0,0,0,0) 5%)`
+    )
+  }
+
+  /** Bend gradient for one side of an open spread at `spreadIndex`. */
+  private bendFor(spreadIndex: number, side: 'left' | 'right'): string {
+    const total = this.spreads.length
+    const t = total > 1 ? spreadIndex / (total - 1) : 0.5
+    return side === 'left'
+      ? FlipEngine.bendGradient('left', 1 - 0.65 * t)
+      : FlipEngine.bendGradient('right', 0.35 + 0.65 * t)
+  }
+
+  /**
+   * The gutter-side shading the page in `slot` shows once `spreadIndex` is at
+   * rest: the page-bend gradient on an open spread, the binding crease on a
+   * lone cover/back cover, or '' for an empty slot.
+   */
+  private gutterShadingFor(spreadIndex: number, slot: 'left' | 'right'): string {
+    const { left, right } = this.slotPages(spreadIndex)
+    if (left && right) return this.bendFor(spreadIndex, slot)
+    if (slot === 'right' ? right : left) {
+      return FlipEngine.closedSpineGradient(slot === 'right' ? 'to right' : 'to left')
+    }
+    return ''
+  }
+
+  /** Resolve what the chrome should look like once `spreadIndex` is at rest. */
+  private chromeStateFor(spreadIndex: number): ChromeState {
+    const state: ChromeState = {
+      shadowLeft: 0,
+      shadowWidth: 1,
+      shadowOpacity: 1,
+      spineOpacity: 0,
+      bendOpacity: 0,
+      bendLeftBg: '',
+      bendRightBg: '',
+      coverSpineOpacity: 0,
+      coverSpineLeft: 0,
+      coverSpineBg: '',
+    }
+    if (this.orientation === 'portrait') return state
+    const { left, right } = this.slotPages(spreadIndex)
+    if (left && right) {
+      // Open book: gutter spine and page-bend shading. A page over a thin
+      // stack dips steeply into the gutter while a thick stack keeps it
+      // nearly flat, so each side's bend eases off as its stack grows.
+      state.spineOpacity = 1
+      state.bendOpacity = 1
+      state.bendLeftBg = this.bendFor(spreadIndex, 'left')
+      state.bendRightBg = this.bendFor(spreadIndex, 'right')
+      return state
+    }
+    if (left || right) {
+      // Closed book (lone cover or back cover): half-width shadow plus a
+      // binding-edge gradient on the spine side, which always faces center.
+      const onRight = Boolean(right)
+      state.shadowLeft = onRight ? 0.5 : 0
+      state.shadowWidth = 0.5
+      state.coverSpineOpacity = 1
+      state.coverSpineLeft = onRight ? 0.5 : 0
+      state.coverSpineBg = FlipEngine.closedSpineGradient(onRight ? 'to right' : 'to left')
+      return state
+    }
+    state.shadowOpacity = 0
+    return state
+  }
+
+  private applyChromeState(state: ChromeState): void {
+    const chrome = this.chrome
+    if (!chrome) return
+    const ss = chrome.shadow.style
+    ss.left = pct(state.shadowLeft)
+    ss.width = pct(state.shadowWidth)
+    ss.opacity = String(state.shadowOpacity)
+    chrome.spine.style.opacity = String(state.spineOpacity)
+    chrome.bendLeft.style.opacity = String(state.bendOpacity)
+    chrome.bendRight.style.opacity = String(state.bendOpacity)
+    chrome.bendLeft.style.background = state.bendLeftBg
+    chrome.bendRight.style.background = state.bendRightBg
+    const cs = chrome.coverSpine.style
+    cs.opacity = String(state.coverSpineOpacity)
+    cs.left = pct(state.coverSpineLeft)
+    cs.background = state.coverSpineBg
+  }
+
+  /** Repaint the book chrome instantly for a spread at rest. */
+  private updateChrome(spreadIndex: number): void {
+    if (this.chrome) this.applyChromeState(this.chromeStateFor(spreadIndex))
+  }
+
+  /**
+   * Per-frame chrome update during a landscape flip. The shadow footprint is
+   * re-derived from what actually covers the stage right now — the static
+   * pages plus the leaf's horizontal projection (cos of its angle) — so the
+   * shadow never appears under a half the page hasn't reached yet. Overlays
+   * fade out over the first half of the turn (while the leaf uncovers the old
+   * state) and fade in over the second half (as it covers the new one).
+   */
+  private stepChrome(
+    from: ChromeState,
+    to: ChromeState,
+    dir: 1 | -1,
+    staticLeft: boolean,
+    staticRight: boolean,
+    eased: number,
+  ): void {
+    const chrome = this.chrome
+    if (!chrome) return
+    const cos = Math.cos(Math.PI * eased)
+    const sourceCover = 0.5 * Math.max(cos, 0)
+    const destCover = 0.5 * Math.max(-cos, 0)
+    const leftCovered = staticLeft ? 0.5 : dir === 1 ? destCover : sourceCover
+    const rightCovered = staticRight ? 0.5 : dir === 1 ? sourceCover : destCover
+    const ss = chrome.shadow.style
+    ss.left = pct(0.5 - leftCovered)
+    ss.width = pct(leftCovered + rightCovered)
+    ss.opacity = String(from.shadowOpacity + (to.shadowOpacity - from.shadowOpacity) * eased)
+
+    const fadeIn = Math.max(0, 2 * eased - 1)
+    const fadeOut = Math.max(0, 1 - 2 * eased)
+    const cross = (fromO: number, toO: number): string =>
+      String(toO > fromO ? fromO + (toO - fromO) * fadeIn : toO + (fromO - toO) * fadeOut)
+    const late = eased >= 0.5
+    chrome.spine.style.opacity = cross(from.spineOpacity, to.spineOpacity)
+    const bendOpacity = cross(from.bendOpacity, to.bendOpacity)
+    chrome.bendLeft.style.opacity = bendOpacity
+    chrome.bendRight.style.opacity = bendOpacity
+    chrome.bendLeft.style.background = late ? to.bendLeftBg : from.bendLeftBg
+    chrome.bendRight.style.background = late ? to.bendRightBg : from.bendRightBg
+    const cs = chrome.coverSpine.style
+    cs.opacity = cross(from.coverSpineOpacity, to.coverSpineOpacity)
+    cs.left = pct(late ? to.coverSpineLeft : from.coverSpineLeft)
+    cs.background = late ? to.coverSpineBg : from.coverSpineBg
   }
 
   private applyStageSize(): void {
@@ -330,7 +567,22 @@ export class FlipEngine {
       if (page) this.showAt(page, slot)
     }
 
-    const { leaf, shadows } = this.buildLeaf(dir, frontEl, backEl)
+    let chromeStep: ((eased: number) => void) | null = null
+    if (this.chrome) {
+      if (this.orientation === 'portrait') {
+        // Portrait chrome is a constant full-width shadow; no need to animate.
+        this.updateChrome(target)
+      } else {
+        const staticLeft = statics.some((s) => s.page !== undefined && s.slot === 'left')
+        const staticRight = statics.some((s) => s.page !== undefined && s.slot === 'right')
+        const fromState = this.chromeStateFor(this.spreadIndex)
+        const toState = this.chromeStateFor(target)
+        chromeStep = (eased) =>
+          this.stepChrome(fromState, toState, dir, staticLeft, staticRight, eased)
+      }
+    }
+
+    const { leaf, shadows } = this.buildLeaf(dir, frontEl, backEl, target)
     this.stage.appendChild(leaf)
 
     const duration = Math.max(0, this.opts.flippingTime ?? 800)
@@ -341,6 +593,7 @@ export class FlipEngine {
       leaf,
       movedPages: [frontEl, backEl],
       shadows,
+      chrome: chromeStep,
       targetSpread: target,
       endAngle,
       raf: 0,
@@ -352,6 +605,7 @@ export class FlipEngine {
       const t = duration === 0 ? 1 : Math.min(1, (now() - startTime) / duration)
       const eased = easeInOutQuad(t)
       leaf.style.transform = `rotateY(${endAngle * eased}deg)`
+      anim.chrome?.(eased)
       const shadowOpacity = Math.sin(Math.PI * eased) * maxShadow
       for (const shadow of anim.shadows) shadow.style.opacity = String(shadowOpacity)
       if (t < 1) anim.raf = requestAnimationFrame(step)
@@ -364,6 +618,7 @@ export class FlipEngine {
     dir: 1 | -1,
     frontEl: HTMLElement,
     backEl: HTMLElement,
+    targetSpread: number,
   ): { leaf: HTMLElement; shadows: HTMLElement[] } {
     const landscape = this.orientation === 'landscape'
     const leaf = document.createElement('div')
@@ -399,6 +654,26 @@ export class FlipEngine {
       ps.width = '100%'
       ps.height = '100%'
       face.appendChild(pageEl)
+      if (this.opts.drawShadow !== false && landscape) {
+        // Carry the page's resting gutter shading (bend or binding crease) on
+        // the face itself, so the page doesn't lose its spine shadow the
+        // moment it starts moving. The front face shows the outgoing state,
+        // the back face the destination state; both vanish with the leaf.
+        // The back face's rotateY(180deg) mirror cancels the left/right slot
+        // swap, so the rest-state gradient string is correct on it as-is.
+        const slot = (dir === 1) !== isBack ? 'right' : 'left'
+        const shading = this.gutterShadingFor(isBack ? targetSpread : this.spreadIndex, slot)
+        if (shading) {
+          const bend = document.createElement('div')
+          bend.className = 'vpf-leaf-bend'
+          const bs = bend.style
+          bs.position = 'absolute'
+          bs.inset = '0'
+          bs.pointerEvents = 'none'
+          bs.background = shading
+          face.appendChild(bend)
+        }
+      }
       if (this.opts.drawShadow !== false) {
         const shadow = document.createElement('div')
         const ss = shadow.style
