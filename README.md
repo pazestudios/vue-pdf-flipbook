@@ -136,6 +136,7 @@ Every internal element also carries a stable data attribute (`data-pdf-flipbook`
 | `renderRange` | `number` | `2` | Spreads kept rendered around the current one; `Infinity` renders all |
 | `controlsPosition` | `'top' \| 'bottom'` | `'bottom'` | Place controls above or below the book |
 | `maxZoom` | `number` | `2` | Maximum pinch/scroll zoom level; `1` disables zooming |
+| `pinchZoom` | `boolean \| 'fullscreen'` | `true` | Gate on interactive pinch/scroll zoom: `false` disables it entirely, `'fullscreen'` allows it only while the book is fullscreen. `setZoom` still works either way |
 | `containerClass`, `bookClass`, `pageClass`, `controlsClass`, `buttonClass`, `pageIndicatorClass`, `loadingClass`, `errorClass` | `string` | — | Class hooks for every element |
 | `fullscreenClass` | `string` | — | Extra classes applied to the container while fullscreen |
 
@@ -191,6 +192,8 @@ The default controls include a fullscreen toggle (hidden when the browser doesn'
 ## Zoom
 
 Zoom in with a touch pinch, trackpad pinch, or the mouse wheel over the book (up to `maxZoom`, default 2×). While zoomed, dragging pans the page instead of flipping it — the prev/next controls still work and keep the zoom. Zooming stays sharp because pages are pre-rendered above CSS size (`renderScale`). Programmatic control: `setZoom(level)` / `resetZoom()` via the template ref or the `controls` slot, plus a `zoom-changed` event. Set `:max-zoom="1"` to disable zooming.
+
+Use `pinch-zoom` to restrict the interactive gesture instead: `:pinch-zoom="false"` turns off touch/trackpad/wheel zoom entirely (programmatic `setZoom` still works), and `pinch-zoom="fullscreen"` only allows the gesture once the book is fullscreen — handy for keeping page-turn swipes unambiguous in the inline view.
 
 ## SSR / Nuxt
 

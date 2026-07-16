@@ -24,6 +24,7 @@ const props = withDefaults(defineProps<PdfFlipbookProps>(), {
   renderRange: 2,
   controlsPosition: 'bottom',
   maxZoom: 2,
+  pinchZoom: 'fullscreen',
 })
 
 const emit = defineEmits<PdfFlipbookEmits>()
@@ -47,6 +48,9 @@ const fullscreen = useFullscreen(
     // The flip engine observes the container, but re-check layout on the next
     // frame in case the fullscreen resize lands after the observer settles.
     requestAnimationFrame(() => flip.getInstance()?.update())
+    // Interactive zoom is being gated off now — don't leave the book stuck
+    // zoomed/panned with no gesture left to undo it.
+    if (!active && props.pinchZoom === 'fullscreen') zoom.reset()
   },
 )
 const isFullscreen = fullscreen.isFullscreen
@@ -57,6 +61,7 @@ const { pdf, totalPages, loading, progress, error, load, teardown } = usePdfDocu
 
 const zoom = useZoom(() => viewportRef.value, {
   maxZoom: () => props.maxZoom,
+  allowZoom: () => props.pinchZoom !== false && (props.pinchZoom !== 'fullscreen' || isFullscreen.value),
   onChange: (level) => emit('zoom-changed', level),
 })
 

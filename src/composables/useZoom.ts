@@ -3,6 +3,8 @@ import { computed, ref } from 'vue'
 export interface UseZoomOptions {
   /** Max zoom level; zooming is disabled when <= 1. */
   maxZoom: () => number
+  /** Extra gate on top of maxZoom, e.g. to restrict pinch/scroll zoom to fullscreen. Default: always true. */
+  allowZoom?: () => boolean
   onChange?: (zoom: number) => void
 }
 
@@ -55,7 +57,7 @@ export function useZoom(getViewport: () => HTMLElement | null, options: UseZoomO
   let suppressNextClick = false
   let gestureBaseZoom: number | null = null
 
-  const enabled = (): boolean => options.maxZoom() > 1
+  const enabled = (): boolean => options.maxZoom() > 1 && (options.allowZoom?.() ?? true)
 
   function clampZoom(value: number): number {
     return Math.min(Math.max(value, 1), Math.max(options.maxZoom(), 1))

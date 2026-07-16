@@ -92,6 +92,13 @@ export interface PdfFlipbookProps {
    * zoomed. Set to 1 to disable zooming. Default 2.
    */
   maxZoom?: number
+  /**
+   * Controls when pinch/scroll zoom is active: `true` always (default),
+   * `false` to disable it entirely, or `'fullscreen'` to only allow it while
+   * the book is in fullscreen mode. Programmatic zoom (`setZoom`) still
+   * works regardless of this setting.
+   */
+  pinchZoom?: boolean | 'fullscreen'
 
   /* Headless styling hooks — pass Tailwind (or any) classes. */
   containerClass?: string

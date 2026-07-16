@@ -72,6 +72,7 @@ renderScale: number;
 renderRange: number;
 controlsPosition: ControlsPosition;
 maxZoom: number;
+pinchZoom: boolean | "fullscreen";
 }, {}, {}, {}, string, ComponentProvideOptions, false, {
 rootRef: HTMLDivElement;
 viewportRef: HTMLDivElement;
@@ -290,6 +291,13 @@ export declare interface PdfFlipbookProps {
      * zoomed. Set to 1 to disable zooming. Default 2.
      */
     maxZoom?: number;
+    /**
+     * Controls when pinch/scroll zoom is active: `true` always (default),
+     * `false` to disable it entirely, or `'fullscreen'` to only allow it while
+     * the book is in fullscreen mode. Programmatic zoom (`setZoom`) still
+     * works regardless of this setting.
+     */
+    pinchZoom?: boolean | 'fullscreen';
     containerClass?: string;
     /** Extra classes applied to the container while in fullscreen. */
     fullscreenClass?: string;
