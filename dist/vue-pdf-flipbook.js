@@ -1,11 +1,11 @@
-var Oe = Object.defineProperty;
-var Ie = (i, e, t) => e in i ? Oe(i, e, { enumerable: !0, configurable: !0, writable: !0, value: t }) : i[e] = t;
-var W = (i, e, t) => Ie(i, typeof e != "symbol" ? e + "" : e, t);
-import { shallowRef as ge, ref as z, computed as Z, defineComponent as xe, openBlock as K, createElementBlock as J, normalizeClass as G, createElementVNode as X, toDisplayString as oe, unref as Y, createCommentVNode as ne, onMounted as Re, onBeforeUnmount as We, watch as ze, readonly as ae, normalizeStyle as te, renderSlot as re, normalizeProps as ve, mergeProps as me, createVNode as be, withDirectives as Be, withModifiers as $e, vShow as Ye, nextTick as De } from "vue";
-function le() {
+var Ie = Object.defineProperty;
+var Re = (i, e, t) => e in i ? Ie(i, e, { enumerable: !0, configurable: !0, writable: !0, value: t }) : i[e] = t;
+var W = (i, e, t) => Re(i, typeof e != "symbol" ? e + "" : e, t);
+import { shallowRef as ve, ref as z, computed as Z, defineComponent as Se, openBlock as K, createElementBlock as J, normalizeClass as G, createElementVNode as X, toDisplayString as le, unref as Y, createCommentVNode as se, onMounted as We, onBeforeUnmount as ze, watch as Be, readonly as re, normalizeStyle as ne, renderSlot as oe, normalizeProps as me, mergeProps as be, createVNode as ye, withDirectives as $e, withModifiers as Ye, vShow as De, nextTick as Ae } from "vue";
+function ce() {
   return typeof window < "u" && typeof document < "u";
 }
-function ye(i) {
+function we(i) {
   typeof i.getOrInsertComputed != "function" && Object.defineProperty(i, "getOrInsertComputed", {
     value(e, t) {
       if (this.has(e)) return this.get(e);
@@ -17,9 +17,9 @@ function ye(i) {
     enumerable: !1
   });
 }
-function Ae() {
-  if (!le()) return;
-  ye(Map.prototype), ye(WeakMap.prototype), typeof Math.sumPrecise != "function" && Object.defineProperty(Math, "sumPrecise", {
+function Xe() {
+  if (!ce()) return;
+  we(Map.prototype), we(WeakMap.prototype), typeof Math.sumPrecise != "function" && Object.defineProperty(Math, "sumPrecise", {
     // Plain summation: pdf.js only uses this for text-layer buffer offsets,
     // where full Neumaier precision is irrelevant.
     value: (e) => {
@@ -32,19 +32,19 @@ function Ae() {
     enumerable: !1
   });
 }
-let Se, we = !1;
-function Xe(i) {
-  Se = i;
-}
+let Ee, Ce = !1;
 function Ge(i) {
+  Ee = i;
+}
+function Ze(i) {
   return `https://cdn.jsdelivr.net/npm/pdfjs-dist@${i.version}/build/pdf.worker.min.mjs`;
 }
-function Ee(i) {
-  i.GlobalWorkerOptions.workerSrc = Ge(i), we || (we = !0, console.warn(
+function Fe(i) {
+  i.GlobalWorkerOptions.workerSrc = Ze(i), Ce || (Ce = !0, console.warn(
     '[vue-pdf-flipbook] Falling back to loading the pdf.js worker from jsdelivr. For offline or CSP-restricted environments, pass a `workerSrc` prop or plugin option (e.g. in Vite: `import workerUrl from "pdfjs-dist/build/pdf.worker.min.mjs?url"`).'
   ));
 }
-async function Ze(i) {
+async function Ne(i) {
   try {
     const e = await fetch(i, { method: "HEAD" });
     return e.ok ? (e.headers.get("content-type") ?? "").includes("javascript") : !1;
@@ -52,30 +52,30 @@ async function Ze(i) {
     return !1;
   }
 }
-async function Ne(i, e) {
-  if (!le()) return !0;
-  const t = e ?? Se;
+async function He(i, e) {
+  if (!ce()) return !0;
+  const t = e ?? Ee;
   if (t)
     return i.GlobalWorkerOptions.workerSrc = t, !0;
   if (i.GlobalWorkerOptions.workerSrc) return !0;
   const n = "pdfjs-dist/build/pdf.worker.min.mjs";
   try {
     const s = new URL(n, import.meta.url).toString();
-    if (s.startsWith("http") && await Ze(s))
+    if (s.startsWith("http") && await Ne(s))
       return i.GlobalWorkerOptions.workerSrc = s, !1;
   } catch {
   }
-  return Ee(i), !1;
+  return Fe(i), !1;
 }
-function Ce(i) {
+function ke(i) {
   return typeof i == "string" || i instanceof URL ? { url: i.toString() } : i instanceof ArrayBuffer ? { data: new Uint8Array(i.slice(0)) } : { data: i.slice() };
 }
-function He(i) {
+function Te(i) {
   const e = i instanceof Error ? i.message : String(i);
   return /worker/i.test(e) || /import/i.test(e);
 }
-function Te() {
-  const i = ge(null), e = z(0), t = z(!1), n = z(0), s = ge(null);
+function je() {
+  const i = ve(null), e = z(0), t = z(!1), n = z(0), s = ve(null);
   let o = 0, a = null;
   async function c() {
     o++;
@@ -87,40 +87,40 @@ function Te() {
     }
   }
   async function h(u, l = {}) {
-    if (!le()) return null;
+    if (!ce()) return null;
     t.value = !0, s.value = null, n.value = 0, await c();
-    const p = o;
+    const g = o;
     try {
-      Ae();
-      const v = await import("pdfjs-dist"), x = await Ne(v, l.workerSrc);
-      if (p !== o) return null;
-      const S = { ...Ce(u), ...l.pdfOptions }, C = () => {
-        const y = v.getDocument(S);
-        return y.onProgress = (k) => {
-          p === o && k.total > 0 && (n.value = Math.min(1, k.loaded / k.total));
-        }, a = y, y.promise;
+      Xe();
+      const v = await import("pdfjs-dist"), C = await He(v, l.workerSrc);
+      if (g !== o) return null;
+      const L = { ...ke(u), ...l.pdfOptions }, k = () => {
+        const b = v.getDocument(L);
+        return b.onProgress = (O) => {
+          g === o && O.total > 0 && (n.value = Math.min(1, O.loaded / O.total));
+        }, a = b, b.promise;
       };
-      let m;
+      let p;
       try {
-        m = await C();
-      } catch (y) {
-        if (x || !He(y)) throw y;
-        Ee(v), Object.assign(S, Ce(u)), m = await C();
+        p = await k();
+      } catch (b) {
+        if (C || !Te(b)) throw b;
+        Fe(v), Object.assign(L, ke(u)), p = await k();
       }
-      return p !== o ? (m.destroy().catch(() => {
-      }), null) : (i.value = m, e.value = m.numPages, m);
+      return g !== o ? (p.destroy().catch(() => {
+      }), null) : (i.value = p, e.value = p.numPages, p);
     } catch (v) {
-      return p === o && (s.value = v instanceof Error ? v : new Error(String(v))), null;
+      return g === o && (s.value = v instanceof Error ? v : new Error(String(v))), null;
     } finally {
-      p === o && (t.value = !1);
+      g === o && (t.value = !1);
     }
   }
   return { pdf: i, totalPages: e, loading: t, progress: n, error: s, load: h, teardown: c };
 }
-function je(i) {
+function Ve(i) {
   return i instanceof Error && i.name === "RenderingCancelledException";
 }
-function Ve(i) {
+function Ue(i) {
   let e = null;
   const t = /* @__PURE__ */ new Map(), n = /* @__PURE__ */ new Set(), s = /* @__PURE__ */ new Set();
   let o = 1, a = null, c = !1;
@@ -128,102 +128,102 @@ function Ve(i) {
     return Math.min(typeof window < "u" && window.devicePixelRatio || 1, 2);
   }
   function u() {
-    const d = i.renderRange();
-    return d === 1 / 0 ? 1 / 0 : Math.max(2, d * 2 + 1);
+    const f = i.renderRange();
+    return f === 1 / 0 ? 1 / 0 : Math.max(2, f * 2 + 1);
   }
   function l() {
     if (!e) return [];
-    const d = e.numPages, L = u(), I = [];
-    for (let g = 1; g <= d; g++)
-      Math.abs(g - o) <= L && !n.has(g) && !s.has(g) && t.has(g) && I.push(g);
-    return I.sort((g, b) => {
-      const E = Math.abs(g - o), P = Math.abs(b - o);
-      return E === P ? b - g : E - P;
+    const f = e.numPages, P = u(), I = [];
+    for (let S = 1; S <= f; S++)
+      Math.abs(S - o) <= P && !n.has(S) && !s.has(S) && t.has(S) && I.push(S);
+    return I.sort((S, m) => {
+      const y = Math.abs(S - o), F = Math.abs(m - o);
+      return y === F ? m - S : y - F;
     }), I;
   }
-  function p() {
-    const d = u();
-    if (d !== 1 / 0) {
-      for (const L of n)
-        if (Math.abs(L - o) > d * 2) {
-          const I = t.get(L);
-          I && (I.width = 0, I.height = 0), n.delete(L);
+  function g() {
+    const f = u();
+    if (f !== 1 / 0) {
+      for (const P of n)
+        if (Math.abs(P - o) > f * 2) {
+          const I = t.get(P);
+          I && (I.width = 0, I.height = 0), n.delete(P);
         }
     }
   }
-  async function v(d) {
-    var b, E;
+  async function v(f) {
+    var m, y;
     if (!e) return;
-    const L = t.get(d);
-    if (!L) return;
-    const I = e, g = { page: d, task: null, cancelled: !1 };
-    a = g;
+    const P = t.get(f);
+    if (!P) return;
+    const I = e, S = { page: f, task: null, cancelled: !1 };
+    a = S;
     try {
-      const P = await I.getPage(d);
-      if (g.cancelled || e !== I) return;
-      const R = P.getViewport({ scale: i.renderScale() * h() });
-      if (L.width = Math.floor(R.width), L.height = Math.floor(R.height), g.task = P.render({ canvas: L, viewport: R }), await g.task.promise, g.cancelled || e !== I) return;
-      n.add(d), (b = i.onRendered) == null || b.call(i, d);
-    } catch (P) {
-      !je(P) && !g.cancelled && (s.add(d), (E = i.onError) == null || E.call(i, d, P instanceof Error ? P : new Error(String(P))));
+      const F = await I.getPage(f);
+      if (S.cancelled || e !== I) return;
+      const R = F.getViewport({ scale: i.renderScale() * h() });
+      if (P.width = Math.floor(R.width), P.height = Math.floor(R.height), S.task = F.render({ canvas: P, viewport: R }), await S.task.promise, S.cancelled || e !== I) return;
+      n.add(f), (m = i.onRendered) == null || m.call(i, f);
+    } catch (F) {
+      !Ve(F) && !S.cancelled && (s.add(f), (y = i.onError) == null || y.call(i, f, F instanceof Error ? F : new Error(String(F))));
     } finally {
-      a === g && (a = null);
+      a === S && (a = null);
     }
   }
-  function x() {
-    return new Promise((d) => {
-      typeof requestIdleCallback == "function" ? requestIdleCallback(() => d()) : setTimeout(d, 16);
+  function C() {
+    return new Promise((f) => {
+      typeof requestIdleCallback == "function" ? requestIdleCallback(() => f()) : setTimeout(f, 16);
     });
   }
-  async function S() {
+  async function L() {
     if (!c) {
       c = !0;
       try {
-        const d = i.renderRange() === 1 / 0;
-        let L;
-        for (; e && (L = l()[0]) !== void 0; )
-          d && await x(), await v(L);
+        const f = i.renderRange() === 1 / 0;
+        let P;
+        for (; e && (P = l()[0]) !== void 0; )
+          f && await C(), await v(P);
       } finally {
         c = !1;
       }
     }
   }
-  function C() {
-    var d;
-    a && Math.abs(a.page - o) > u() && (a.cancelled = !0, (d = a.task) == null || d.cancel());
+  function k() {
+    var f;
+    a && Math.abs(a.page - o) > u() && (a.cancelled = !0, (f = a.task) == null || f.cancel());
   }
-  function m(d) {
-    O(), e = d, n.clear(), s.clear();
+  function p(f) {
+    x(), e = f, n.clear(), s.clear();
   }
-  function y(d, L) {
-    t.set(d, L);
+  function b(f, P) {
+    t.set(f, P);
   }
-  function k(d) {
-    o = d, C(), p(), S();
+  function O(f) {
+    o = f, k(), g(), L();
   }
-  function O() {
-    var d;
-    a && (a.cancelled = !0, (d = a.task) == null || d.cancel(), a = null);
+  function x() {
+    var f;
+    a && (a.cancelled = !0, (f = a.task) == null || f.cancel(), a = null);
   }
   function B() {
-    O(), e = null, t.clear(), n.clear(), s.clear(), o = 1;
+    x(), e = null, t.clear(), n.clear(), s.clear(), o = 1;
   }
   return {
-    setDocument: m,
-    registerCanvas: y,
-    updateWindow: k,
-    cancelAll: O,
+    setDocument: p,
+    registerCanvas: b,
+    updateWindow: O,
+    cancelAll: x,
     reset: B,
-    isRendered: (d) => n.has(d)
+    isRendered: (f) => n.has(f)
   };
 }
 function q(i) {
   return `${+(i * 100).toFixed(2)}%`;
 }
-function Ue(i) {
+function qe(i) {
   return i < 0.5 ? 2 * i * i : 1 - (-2 * i + 2) ** 2 / 2;
 }
-function ke() {
+function Pe() {
   return typeof performance < "u" ? performance.now() : Date.now();
 }
 class Q {
@@ -480,14 +480,14 @@ class Q {
   stepChrome(e, t, n, s, o, a) {
     const c = this.chrome;
     if (!c) return;
-    const h = Math.cos(Math.PI * a), u = 0.5 * Math.max(h, 0), l = 0.5 * Math.max(-h, 0), p = s ? 0.5 : n === 1 ? l : u, v = o ? 0.5 : n === 1 ? u : l, x = c.shadow.style;
-    x.left = q(0.5 - p), x.width = q(p + v), x.opacity = String(e.shadowOpacity + (t.shadowOpacity - e.shadowOpacity) * a);
-    const S = Math.max(0, 2 * a - 1), C = Math.max(0, 1 - 2 * a), m = (B, d) => String(d > B ? B + (d - B) * S : d + (B - d) * C), y = a >= 0.5;
-    c.spine.style.opacity = m(e.spineOpacity, t.spineOpacity);
-    const k = m(e.bendOpacity, t.bendOpacity);
-    c.bendLeft.style.opacity = k, c.bendRight.style.opacity = k, c.bendLeft.style.background = y ? t.bendLeftBg : e.bendLeftBg, c.bendRight.style.background = y ? t.bendRightBg : e.bendRightBg;
-    const O = c.coverSpine.style;
-    O.opacity = m(e.coverSpineOpacity, t.coverSpineOpacity), O.left = q(y ? t.coverSpineLeft : e.coverSpineLeft), O.background = y ? t.coverSpineBg : e.coverSpineBg;
+    const h = Math.cos(Math.PI * a), u = 0.5 * Math.max(h, 0), l = 0.5 * Math.max(-h, 0), g = s ? 0.5 : n === 1 ? l : u, v = o ? 0.5 : n === 1 ? u : l, C = c.shadow.style;
+    C.left = q(0.5 - g), C.width = q(g + v), C.opacity = String(e.shadowOpacity + (t.shadowOpacity - e.shadowOpacity) * a);
+    const L = Math.max(0, 2 * a - 1), k = Math.max(0, 1 - 2 * a), p = (B, f) => String(f > B ? B + (f - B) * L : f + (B - f) * k), b = a >= 0.5;
+    c.spine.style.opacity = p(e.spineOpacity, t.spineOpacity);
+    const O = p(e.bendOpacity, t.bendOpacity);
+    c.bendLeft.style.opacity = O, c.bendRight.style.opacity = O, c.bendLeft.style.background = b ? t.bendLeftBg : e.bendLeftBg, c.bendRight.style.background = b ? t.bendRightBg : e.bendRightBg;
+    const x = c.coverSpine.style;
+    x.opacity = p(e.coverSpineOpacity, t.coverSpineOpacity), x.left = q(b ? t.coverSpineLeft : e.coverSpineLeft), x.background = b ? t.coverSpineBg : e.coverSpineBg;
   }
   applyStageSize() {
     const { pageWidth: e, pageHeight: t } = this.opts, n = this.orientation === "landscape" ? 2 : 1, s = n * e / t, o = this.stage.style;
@@ -506,80 +506,80 @@ class Q {
   }
   /* --------------------------------------------------------------- flipping */
   flipToSpread(e) {
-    var k, O, B, d, L, I, g;
+    var O, x, B, f, P, I, S;
     if (this.destroyed || this.anim || e < 0 || e >= this.spreads.length || e === this.spreadIndex) return;
-    const t = e > this.spreadIndex ? 1 : -1, n = ((k = this.spreads[e]) == null ? void 0 : k[0]) ?? this.getCurrentPage();
-    (B = (O = this.opts).onFlipStart) == null || B.call(O, this.getCurrentPage(), n);
+    const t = e > this.spreadIndex ? 1 : -1, n = ((O = this.spreads[e]) == null ? void 0 : O[0]) ?? this.getCurrentPage();
+    (B = (x = this.opts).onFlipStart) == null || B.call(x, this.getCurrentPage(), n);
     let s, o;
     const a = [];
     if (this.orientation === "portrait")
-      s = (d = this.spreads[this.spreadIndex]) == null ? void 0 : d[0], o = (L = this.spreads[e]) == null ? void 0 : L[0];
+      s = (f = this.spreads[this.spreadIndex]) == null ? void 0 : f[0], o = (P = this.spreads[e]) == null ? void 0 : P[0];
     else {
-      const b = this.slotPages(this.spreadIndex), E = this.slotPages(e);
-      t === 1 ? (s = b.right, o = E.left, a.push({ page: b.left, slot: "left" }, { page: E.right, slot: "right" })) : (s = b.left, o = E.right, a.push({ page: b.right, slot: "right" }, { page: E.left, slot: "left" }));
+      const m = this.slotPages(this.spreadIndex), y = this.slotPages(e);
+      t === 1 ? (s = m.right, o = y.left, a.push({ page: m.left, slot: "left" }, { page: y.right, slot: "right" })) : (s = m.left, o = y.right, a.push({ page: m.right, slot: "right" }, { page: y.left, slot: "left" }));
     }
     const c = s ? this.pageEl(s) : void 0, h = o ? this.pageEl(o) : void 0;
     if (!c || !h) {
-      this.spreadIndex = e, this.layout(), (g = (I = this.opts).onFlip) == null || g.call(I, this.getCurrentPage());
+      this.spreadIndex = e, this.layout(), (S = (I = this.opts).onFlip) == null || S.call(I, this.getCurrentPage());
       return;
     }
     this.hideAll();
-    for (const { page: b, slot: E } of a)
-      b && this.showAt(b, E);
+    for (const { page: m, slot: y } of a)
+      m && this.showAt(m, y);
     let u = null;
     if (this.chrome)
       if (this.orientation === "portrait")
         this.updateChrome(e);
       else {
-        const b = a.some(($) => $.page !== void 0 && $.slot === "left"), E = a.some(($) => $.page !== void 0 && $.slot === "right"), P = this.chromeStateFor(this.spreadIndex), R = this.chromeStateFor(e);
-        u = ($) => this.stepChrome(P, R, t, b, E, $);
+        const m = a.some((M) => M.page !== void 0 && M.slot === "left"), y = a.some((M) => M.page !== void 0 && M.slot === "right"), F = this.chromeStateFor(this.spreadIndex), R = this.chromeStateFor(e);
+        u = (M) => this.stepChrome(F, R, t, m, y, M);
       }
-    const { leaf: l, shadows: p } = this.buildLeaf(t, c, h, e);
+    const { leaf: l, shadows: g } = this.buildLeaf(t, c, h, e);
     this.stage.appendChild(l);
-    const v = Math.max(0, this.opts.flippingTime ?? 800), x = t === 1 ? -180 : 180, S = this.opts.maxShadowOpacity ?? 0.4, C = ke(), m = {
+    const v = Math.max(0, this.opts.flippingTime ?? 800), C = t === 1 ? -180 : 180, L = this.opts.maxShadowOpacity ?? 0.4, k = Pe(), p = {
       leaf: l,
       movedPages: [c, h],
-      shadows: p,
+      shadows: g,
       chrome: u,
       targetSpread: e,
-      endAngle: x,
+      endAngle: C,
       raf: 0
     };
-    this.anim = m;
-    const y = () => {
+    this.anim = p;
+    const b = () => {
       var R;
-      if (this.destroyed || this.anim !== m) return;
-      const b = v === 0 ? 1 : Math.min(1, (ke() - C) / v), E = Ue(b);
-      l.style.transform = `rotateY(${x * E}deg)`, (R = m.chrome) == null || R.call(m, E);
-      const P = Math.sin(Math.PI * E) * S;
-      for (const $ of m.shadows) $.style.opacity = String(P);
-      b < 1 ? m.raf = requestAnimationFrame(y) : this.finishFlip(m);
+      if (this.destroyed || this.anim !== p) return;
+      const m = v === 0 ? 1 : Math.min(1, (Pe() - k) / v), y = qe(m);
+      l.style.transform = `rotateY(${C * y}deg)`, (R = p.chrome) == null || R.call(p, y);
+      const F = Math.sin(Math.PI * y) * L;
+      for (const M of p.shadows) M.style.opacity = String(F);
+      m < 1 ? p.raf = requestAnimationFrame(b) : this.finishFlip(p);
     };
-    y();
+    b();
   }
   buildLeaf(e, t, n, s) {
     const o = this.orientation === "landscape", a = document.createElement("div");
     a.className = "vpf-leaf";
     const c = a.style;
     c.position = "absolute", c.top = "0", c.height = "100%", c.width = o ? "50%" : "100%", c.left = o && e === 1 ? "50%" : "0", c.transformOrigin = o ? e === 1 ? "left center" : "right center" : "center center", c.transformStyle = "preserve-3d", c.zIndex = "10", c.pointerEvents = "none", c.willChange = "transform";
-    const h = [], u = e === 1 ? "right" : "left", l = (p, v) => {
-      const x = document.createElement("div"), S = x.style;
-      S.position = "absolute", S.inset = "0", S.backfaceVisibility = "hidden", S.overflow = "hidden", v && (S.transform = "rotateY(180deg)");
-      const C = p.style;
-      if (C.display = "block", C.position = "absolute", C.top = "0", C.left = "0", C.width = "100%", C.height = "100%", x.appendChild(p), this.opts.drawShadow !== !1 && o) {
-        const m = e === 1 !== v ? "right" : "left", y = this.gutterShadingFor(v ? s : this.spreadIndex, m);
-        if (y) {
-          const k = document.createElement("div");
-          k.className = "vpf-leaf-bend";
-          const O = k.style;
-          O.position = "absolute", O.inset = "0", O.pointerEvents = "none", O.background = y, x.appendChild(k);
+    const h = [], u = e === 1 ? "right" : "left", l = (g, v) => {
+      const C = document.createElement("div"), L = C.style;
+      L.position = "absolute", L.inset = "0", L.backfaceVisibility = "hidden", L.overflow = "hidden", v && (L.transform = "rotateY(180deg)");
+      const k = g.style;
+      if (k.display = "block", k.position = "absolute", k.top = "0", k.left = "0", k.width = "100%", k.height = "100%", C.appendChild(g), this.opts.drawShadow !== !1 && o) {
+        const p = e === 1 !== v ? "right" : "left", b = this.gutterShadingFor(v ? s : this.spreadIndex, p);
+        if (b) {
+          const O = document.createElement("div");
+          O.className = "vpf-leaf-bend";
+          const x = O.style;
+          x.position = "absolute", x.inset = "0", x.pointerEvents = "none", x.background = b, C.appendChild(O);
         }
       }
       if (this.opts.drawShadow !== !1) {
-        const m = document.createElement("div"), y = m.style;
-        y.position = "absolute", y.inset = "0", y.pointerEvents = "none", y.opacity = "0", y.background = `linear-gradient(to ${u}, rgba(0,0,0,0.65), rgba(0,0,0,0) 65%)`, x.appendChild(m), h.push(m);
+        const p = document.createElement("div"), b = p.style;
+        b.position = "absolute", b.inset = "0", b.pointerEvents = "none", b.opacity = "0", b.background = `linear-gradient(to ${u}, rgba(0,0,0,0.65), rgba(0,0,0,0) 65%)`, C.appendChild(p), h.push(p);
       }
-      return x;
+      return C;
     };
     return a.append(l(t, !1), l(n, !0)), { leaf: a, shadows: h };
   }
@@ -590,7 +590,7 @@ class Q {
     e.leaf.remove(), this.anim = null, this.spreadIndex = e.targetSpread, this.layout(), (n = (t = this.opts).onFlip) == null || n.call(t, this.getCurrentPage());
   }
 }
-function qe(i) {
+function Ke(i) {
   const e = [];
   for (let t = 0; t < i.pageCount; t++) {
     const n = !!i.trailingBlank && t === i.pageCount - 1, s = document.createElement("div"), o = ["vpf-page"];
@@ -606,11 +606,11 @@ function qe(i) {
   }
   return e;
 }
-function Ke(i) {
+function Je(i) {
   let e = null, t = [], n = null;
   async function s(u, l) {
-    return o(), n = u, t = qe(l), e = new Q(u, {
-      pages: t.map((p) => p.root),
+    return o(), n = u, t = Ke(l), e = new Q(u, {
+      pages: t.map((g) => g.root),
       pageWidth: l.pageWidth,
       pageHeight: l.pageHeight,
       startPage: l.startPage,
@@ -653,63 +653,63 @@ function Ke(i) {
     getPages: () => t
   };
 }
-function Je(i, e) {
+function Qe(i, e) {
   const t = z(1), n = z(0), s = z(0), o = Z(() => t.value === 1 ? {} : {
     transform: `translate(${n.value}px, ${s.value}px) scale(${t.value})`,
     transformOrigin: "0 0",
     willChange: "transform"
   });
-  let a = null, c = null, h = null, u = null, l = null, p = !1, v = null;
-  const x = () => {
+  let a = null, c = null, h = null, u = null, l = null, g = !1, v = null;
+  const C = () => {
     var r;
     return e.maxZoom() > 1 && (((r = e.allowZoom) == null ? void 0 : r.call(e)) ?? !0);
   };
-  function S(r) {
+  function L(r) {
     return Math.min(Math.max(r, 1), Math.max(e.maxZoom(), 1));
   }
-  function C() {
+  function k() {
     a && (n.value = Math.min(0, Math.max(a.clientWidth * (1 - t.value), n.value)), s.value = Math.min(0, Math.max(a.clientHeight * (1 - t.value), s.value)));
   }
-  function m(r, w, D) {
-    var M;
-    const A = S(r), T = t.value;
-    A !== T && (n.value = w - (w - n.value) / T * A, s.value = D - (D - s.value) / T * A, t.value = A, A === 1 ? (n.value = 0, s.value = 0, u = null, l = null) : C(), B(), (M = e.onChange) == null || M.call(e, A));
+  function p(r, w, D) {
+    var U;
+    const A = L(r), j = t.value;
+    A !== j && (n.value = w - (w - n.value) / j * A, s.value = D - (D - s.value) / j * A, t.value = A, A === 1 ? (n.value = 0, s.value = 0, u = null, l = null) : k(), B(), (U = e.onChange) == null || U.call(e, A));
   }
-  function y(r, w) {
-    n.value += r, s.value += w, C();
+  function b(r, w) {
+    n.value += r, s.value += w, k();
   }
-  function k(r) {
-    a && m(r, a.clientWidth / 2, a.clientHeight / 2);
+  function O(r) {
+    a && p(r, a.clientWidth / 2, a.clientHeight / 2);
   }
-  function O() {
+  function x() {
     var r;
     h = null, u = null, l = null, t.value !== 1 && (t.value = 1, n.value = 0, s.value = 0, B(), (r = e.onChange) == null || r.call(e, 1));
   }
   function B() {
     a && (a.style.touchAction = t.value > 1 ? "none" : "", a.style.cursor = t.value > 1 ? u ? "grabbing" : "grab" : "");
   }
-  function d(r, w) {
+  function f(r, w) {
     const D = a.getBoundingClientRect();
     return { x: r - D.left, y: w - D.top };
   }
-  const L = (r) => {
-    if (!a || !x()) return;
-    const w = r.ctrlKey || r.metaKey, D = r.deltaMode === 1 ? r.deltaY * 16 : r.deltaY, A = S(t.value * Math.exp(-D * (w ? 0.01 : 22e-4)));
+  const P = (r) => {
+    if (!a || !C()) return;
+    const w = r.ctrlKey || r.metaKey, D = r.deltaMode === 1 ? r.deltaY * 16 : r.deltaY, A = L(t.value * Math.exp(-D * (w ? 0.01 : 22e-4)));
     if (A === t.value && !w) return;
     r.preventDefault();
-    const { x: T, y: M } = d(r.clientX, r.clientY);
-    m(A, T, M);
+    const { x: j, y: U } = f(r.clientX, r.clientY);
+    p(A, j, U);
   }, I = (r) => Math.hypot(
     r[0].clientX - r[1].clientX,
     r[0].clientY - r[1].clientY
-  ), g = (r) => d(
+  ), S = (r) => f(
     (r[0].clientX + r[1].clientX) / 2,
     (r[0].clientY + r[1].clientY) / 2
-  ), b = (r) => {
-    if (x())
+  ), m = (r) => {
+    if (C())
       if (r.touches.length === 2) {
         r.preventDefault(), u = null, l = null;
-        const w = g(r.touches);
+        const w = S(r.touches);
         h = {
           startDist: I(r.touches),
           startZoom: t.value,
@@ -717,58 +717,58 @@ function Je(i, e) {
           lastMidY: w.y
         };
       } else r.touches.length === 1 && t.value > 1 && (l = { lastX: r.touches[0].clientX, lastY: r.touches[0].clientY });
-  }, E = (r) => {
+  }, y = (r) => {
     if (h && r.touches.length >= 2) {
       r.preventDefault();
-      const w = g(r.touches);
-      y(w.x - h.lastMidX, w.y - h.lastMidY), h.lastMidX = w.x, h.lastMidY = w.y, m(h.startZoom * I(r.touches) / h.startDist, w.x, w.y);
+      const w = S(r.touches);
+      b(w.x - h.lastMidX, w.y - h.lastMidY), h.lastMidX = w.x, h.lastMidY = w.y, p(h.startZoom * I(r.touches) / h.startDist, w.x, w.y);
     } else if (l && r.touches.length === 1 && t.value > 1) {
       r.preventDefault();
       const w = r.touches[0];
-      y(w.clientX - l.lastX, w.clientY - l.lastY), l.lastX = w.clientX, l.lastY = w.clientY;
+      b(w.clientX - l.lastX, w.clientY - l.lastY), l.lastX = w.clientX, l.lastY = w.clientY;
     }
-  }, P = (r) => {
-    h && r.touches.length < 2 && (h = null, p = !0), r.touches.length === 1 && t.value > 1 ? l = { lastX: r.touches[0].clientX, lastY: r.touches[0].clientY } : l = null;
+  }, F = (r) => {
+    h && r.touches.length < 2 && (h = null, g = !0), r.touches.length === 1 && t.value > 1 ? l = { lastX: r.touches[0].clientX, lastY: r.touches[0].clientY } : l = null;
   }, R = (r) => {
     var w;
-    p = !1, !(t.value <= 1) && (r.stopPropagation(), r.pointerType !== "touch" && (u = { pointerId: r.pointerId, lastX: r.clientX, lastY: r.clientY }, (w = a == null ? void 0 : a.setPointerCapture) == null || w.call(a, r.pointerId)), B());
-  }, $ = (r) => {
-    !u || r.pointerId !== u.pointerId || h || (y(r.clientX - u.lastX, r.clientY - u.lastY), u.lastX = r.clientX, u.lastY = r.clientY);
-  }, V = (r) => {
-    (t.value > 1 || h) && r.stopPropagation(), u && r.pointerId === u.pointerId && (u = null, B());
+    g = !1, !(t.value <= 1) && (r.stopPropagation(), r.pointerType !== "touch" && (u = { pointerId: r.pointerId, lastX: r.clientX, lastY: r.clientY }, (w = a == null ? void 0 : a.setPointerCapture) == null || w.call(a, r.pointerId)), B());
+  }, M = (r) => {
+    !u || r.pointerId !== u.pointerId || h || (b(r.clientX - u.lastX, r.clientY - u.lastY), u.lastX = r.clientX, u.lastY = r.clientY);
   }, N = (r) => {
-    (t.value > 1 || p) && (p = !1, r.stopPropagation(), r.preventDefault());
+    (t.value > 1 || h) && r.stopPropagation(), u && r.pointerId === u.pointerId && (u = null, B());
+  }, ie = (r) => {
+    (t.value > 1 || g) && (g = !1, r.stopPropagation(), r.preventDefault());
   }, H = (r) => {
-    x() && (r.preventDefault(), v = t.value);
+    C() && (r.preventDefault(), v = t.value);
+  }, T = (r) => {
+    if (!C() || (r.preventDefault(), h || v === null)) return;
+    const { x: w, y: D } = f(r.clientX, r.clientY);
+    p(v * r.scale, w, D);
   }, _ = (r) => {
-    if (!x() || (r.preventDefault(), h || v === null)) return;
-    const { x: w, y: D } = d(r.clientX, r.clientY);
-    m(v * r.scale, w, D);
-  }, U = (r) => {
     r.preventDefault(), v = null;
   };
-  function se() {
-    ee(), a = i(), a && (a.addEventListener("wheel", L, { passive: !1 }), a.addEventListener("touchstart", b, { passive: !1 }), a.addEventListener("touchmove", E, { passive: !1 }), a.addEventListener("touchend", P), a.addEventListener("touchcancel", P), a.addEventListener("pointerdown", R, { capture: !0 }), a.addEventListener("pointermove", $), a.addEventListener("pointerup", V, { capture: !0 }), a.addEventListener("pointercancel", V, { capture: !0 }), a.addEventListener("click", N, { capture: !0 }), a.addEventListener("gesturestart", H, { passive: !1 }), a.addEventListener("gesturechange", _, { passive: !1 }), a.addEventListener("gestureend", U, { passive: !1 }), typeof ResizeObserver < "u" && (c = new ResizeObserver(() => C()), c.observe(a)));
-  }
   function ee() {
-    a && (a.removeEventListener("wheel", L), a.removeEventListener("touchstart", b), a.removeEventListener("touchmove", E), a.removeEventListener("touchend", P), a.removeEventListener("touchcancel", P), a.removeEventListener("pointerdown", R, { capture: !0 }), a.removeEventListener("pointermove", $), a.removeEventListener("pointerup", V, { capture: !0 }), a.removeEventListener("pointercancel", V, { capture: !0 }), a.removeEventListener("click", N, { capture: !0 }), a.removeEventListener("gesturestart", H), a.removeEventListener("gesturechange", _), a.removeEventListener("gestureend", U), c == null || c.disconnect(), c = null, h = null, u = null, l = null, a = null);
+    te(), a = i(), a && (a.addEventListener("wheel", P, { passive: !1 }), a.addEventListener("touchstart", m, { passive: !1 }), a.addEventListener("touchmove", y, { passive: !1 }), a.addEventListener("touchend", F), a.addEventListener("touchcancel", F), a.addEventListener("pointerdown", R, { capture: !0 }), a.addEventListener("pointermove", M), a.addEventListener("pointerup", N, { capture: !0 }), a.addEventListener("pointercancel", N, { capture: !0 }), a.addEventListener("click", ie, { capture: !0 }), a.addEventListener("gesturestart", H, { passive: !1 }), a.addEventListener("gesturechange", T, { passive: !1 }), a.addEventListener("gestureend", _, { passive: !1 }), typeof ResizeObserver < "u" && (c = new ResizeObserver(() => k()), c.observe(a)));
   }
-  return { zoom: t, contentStyle: o, setZoom: k, reset: O, listen: se, unlisten: ee };
+  function te() {
+    a && (a.removeEventListener("wheel", P), a.removeEventListener("touchstart", m), a.removeEventListener("touchmove", y), a.removeEventListener("touchend", F), a.removeEventListener("touchcancel", F), a.removeEventListener("pointerdown", R, { capture: !0 }), a.removeEventListener("pointermove", M), a.removeEventListener("pointerup", N, { capture: !0 }), a.removeEventListener("pointercancel", N, { capture: !0 }), a.removeEventListener("click", ie, { capture: !0 }), a.removeEventListener("gesturestart", H), a.removeEventListener("gesturechange", T), a.removeEventListener("gestureend", _), c == null || c.disconnect(), c = null, h = null, u = null, l = null, a = null);
+  }
+  return { zoom: t, contentStyle: o, setZoom: O, reset: x, listen: ee, unlisten: te };
 }
-function Fe() {
-  if (!le()) return !1;
+function Le() {
+  if (!ce()) return !1;
   const i = document;
   return !!(i.fullscreenEnabled ?? i.webkitFullscreenEnabled);
 }
-function Qe(i, e) {
+function _e(i, e) {
   const t = z(!1);
   function n() {
     const l = document;
     return l.fullscreenElement ?? l.webkitFullscreenElement ?? null;
   }
   function s() {
-    const l = i(), p = l !== null && n() === l;
-    p !== t.value && (t.value = p, e == null || e(p));
+    const l = i(), g = l !== null && n() === l;
+    g !== t.value && (t.value = g, e == null || e(g));
   }
   function o() {
     document.addEventListener("fullscreenchange", s), document.addEventListener("webkitfullscreenchange", s);
@@ -777,20 +777,20 @@ function Qe(i, e) {
     document.removeEventListener("fullscreenchange", s), document.removeEventListener("webkitfullscreenchange", s);
   }
   async function c() {
-    var p, v;
+    var g, v;
     const l = i();
     if (!(!l || t.value))
       try {
-        await (((p = l.requestFullscreen) == null ? void 0 : p.call(l)) ?? ((v = l.webkitRequestFullscreen) == null ? void 0 : v.call(l)));
+        await (((g = l.requestFullscreen) == null ? void 0 : g.call(l)) ?? ((v = l.webkitRequestFullscreen) == null ? void 0 : v.call(l)));
       } catch {
       }
   }
   async function h() {
-    var p, v;
+    var g, v;
     if (!n()) return;
     const l = document;
     try {
-      await (((p = l.exitFullscreen) == null ? void 0 : p.call(l)) ?? ((v = l.webkitExitFullscreen) == null ? void 0 : v.call(l)));
+      await (((g = l.exitFullscreen) == null ? void 0 : g.call(l)) ?? ((v = l.webkitExitFullscreen) == null ? void 0 : v.call(l)));
     } catch {
     }
   }
@@ -799,7 +799,7 @@ function Qe(i, e) {
   }
   return { isFullscreen: t, enter: c, exit: h, toggle: u, listen: o, unlisten: a };
 }
-const _e = ["disabled"], et = ["disabled"], tt = ["aria-label"], Pe = /* @__PURE__ */ xe({
+const et = ["disabled"], tt = ["disabled"], nt = ["aria-label"], xe = /* @__PURE__ */ Se({
   __name: "DefaultControls",
   props: {
     currentPage: {},
@@ -814,7 +814,7 @@ const _e = ["disabled"], et = ["disabled"], tt = ["aria-label"], Pe = /* @__PURE
   },
   emits: ["next", "prev", "toggle-fullscreen"],
   setup(i) {
-    const e = i, t = Fe(), n = Z(() => {
+    const e = i, t = Le(), n = Z(() => {
       var o;
       const s = (o = e.visiblePages) != null && o.length ? e.visiblePages : [e.currentPage];
       return s.length >= 2 ? `${s[0]}–${s[s.length - 1]}` : String(s[0] ?? e.currentPage);
@@ -830,11 +830,11 @@ const _e = ["disabled"], et = ["disabled"], tt = ["aria-label"], Pe = /* @__PURE
         "aria-label": "Previous page",
         "data-pdf-flipbook-prev": "",
         onClick: o[0] || (o[0] = (a) => s.$emit("prev"))
-      }, " ‹ ", 10, _e),
+      }, " ‹ ", 10, et),
       X("span", {
         class: G(["vpf-indicator", i.pageIndicatorClass]),
         "data-pdf-flipbook-indicator": ""
-      }, oe(n.value) + " / " + oe(i.totalPages), 3),
+      }, le(n.value) + " / " + le(i.totalPages), 3),
       X("button", {
         type: "button",
         class: G(["vpf-button", i.buttonClass]),
@@ -842,7 +842,7 @@ const _e = ["disabled"], et = ["disabled"], tt = ["aria-label"], Pe = /* @__PURE
         "aria-label": "Next page",
         "data-pdf-flipbook-next": "",
         onClick: o[1] || (o[1] = (a) => s.$emit("next"))
-      }, " › ", 10, et),
+      }, " › ", 10, tt),
       Y(t) ? (K(), J("button", {
         key: 0,
         type: "button",
@@ -850,10 +850,10 @@ const _e = ["disabled"], et = ["disabled"], tt = ["aria-label"], Pe = /* @__PURE
         "aria-label": i.isFullscreen ? "Exit full screen" : "Enter full screen",
         "data-pdf-flipbook-fullscreen": "",
         onClick: o[2] || (o[2] = (a) => s.$emit("toggle-fullscreen"))
-      }, oe(i.isFullscreen ? "⤡" : "⤢"), 11, tt)) : ne("", !0)
+      }, le(i.isFullscreen ? "⤡" : "⤢"), 11, nt)) : se("", !0)
     ], 2));
   }
-}), nt = ["data-fullscreen", "data-controls-position"], st = /* @__PURE__ */ xe({
+}), st = ["data-fullscreen", "data-controls-position"], it = /* @__PURE__ */ Se({
   __name: "PdfFlipbook",
   props: {
     src: {},
@@ -887,70 +887,71 @@ const _e = ["disabled"], et = ["disabled"], tt = ["aria-label"], Pe = /* @__PURE
   },
   emits: ["loaded", "error", "page-changed", "flip-start", "orientation-changed", "rendered", "fullscreen-changed", "zoom-changed"],
   setup(i, { expose: e, emit: t }) {
-    const n = i, s = t, o = z(null), a = z(null), c = z(null), h = z(!1), u = z(1), l = z([1]), p = z(1), v = z("landscape"), x = z(null), S = Qe(
+    const n = i, s = t, o = z(null), a = z(null), c = z(null), h = z(!1), u = z(1), l = z([1]), g = z(1), v = z(1), C = z("landscape"), L = z(null), k = _e(
       () => o.value,
-      (f) => {
-        s("fullscreen-changed", f), requestAnimationFrame(() => {
-          var F;
-          return (F = b.getInstance()) == null ? void 0 : F.update();
-        }), !f && n.pinchZoom === "fullscreen" && g.reset();
+      (d) => {
+        s("fullscreen-changed", d), requestAnimationFrame(() => {
+          var E;
+          return (E = y.getInstance()) == null ? void 0 : E.update();
+        }), !d && n.pinchZoom === "fullscreen" && m.reset();
       }
-    ), C = S.isFullscreen, m = z(!1), { pdf: y, totalPages: k, loading: O, progress: B, error: d, load: L, teardown: I } = Te(), g = Je(() => a.value, {
+    ), p = k.isFullscreen, b = z(!1), { pdf: O, totalPages: x, loading: B, progress: f, error: P, load: I, teardown: S } = je(), m = Qe(() => a.value, {
       maxZoom: () => n.maxZoom,
-      allowZoom: () => n.pinchZoom !== !1 && (n.pinchZoom !== "fullscreen" || C.value),
-      onChange: (f) => s("zoom-changed", f)
-    }), b = Ke({
-      onFlip(f) {
-        E(), p.value = f, P.updateWindow(u.value), s("page-changed", { page: u.value, totalPages: k.value });
+      allowZoom: () => n.pinchZoom !== !1 && (n.pinchZoom !== "fullscreen" || p.value),
+      onChange: (d) => s("zoom-changed", d)
+    }), y = Je({
+      onFlip(d) {
+        F(), v.value = d, R.updateWindow(u.value), s("page-changed", { page: u.value, totalPages: x.value });
       },
-      onFlipStart(f, F) {
-        p.value = F, s("flip-start", {
-          fromPage: Math.min(f, k.value),
-          toPage: Math.min(F, k.value)
+      onFlipStart(d, E) {
+        v.value = E, g.value = E, s("flip-start", {
+          fromPage: Math.min(d, x.value),
+          toPage: Math.min(E, x.value)
         });
       },
-      onOrientationChange(f) {
-        v.value = f, E(), P.updateWindow(u.value), s("orientation-changed", f);
+      onOrientationChange(d) {
+        C.value = d, F(), R.updateWindow(u.value), s("orientation-changed", d);
       }
     });
-    function E() {
-      var j;
-      const f = (j = b.getInstance()) == null ? void 0 : j.getCurrentSpread();
-      if (!(f != null && f.length)) return;
-      const F = f.filter((ie) => ie <= k.value);
-      l.value = F.length ? F : [k.value], u.value = l.value[0];
+    function F() {
+      var V;
+      const d = (V = y.getInstance()) == null ? void 0 : V.getCurrentSpread();
+      if (!(d != null && d.length)) return;
+      g.value = d[0];
+      const E = d.filter((ae) => ae <= x.value);
+      l.value = E.length ? E : [x.value], u.value = l.value[0];
     }
-    const P = Ve({
+    const R = Ue({
       renderScale: () => n.renderScale,
       renderRange: () => n.renderRange,
-      onRendered: (f) => s("rendered", { page: f }),
-      onError: (f, F) => s("error", F)
+      onRendered: (d) => s("rendered", { page: d }),
+      onError: (d, E) => s("error", E)
     });
-    let R = 0;
-    async function $() {
-      var he;
-      const f = ++R;
-      h.value = !1, m.value = !1, g.reset(), P.reset(), b.destroy();
-      const F = await L(n.src, {
+    let M = 0;
+    async function N() {
+      var pe;
+      const d = ++M;
+      h.value = !1, b.value = !1, m.reset(), R.reset(), y.destroy();
+      const E = await I(n.src, {
         workerSrc: n.workerSrc,
         pdfOptions: n.pdfOptions
       });
-      if (f !== R) return;
-      if (!F) {
-        d.value && s("error", d.value);
+      if (d !== M) return;
+      if (!E) {
+        P.value && s("error", P.value);
         return;
       }
-      const j = await F.getPage(1);
-      if (f !== R) return;
-      const ie = j.getViewport({ scale: 1 }), ce = n.width, ue = n.height ?? Math.round(ce * (ie.height / ie.width));
-      await De();
-      const de = c.value;
-      if (f !== R || !de) return;
-      const fe = n.showCover && F.numPages % 2 === 1, Le = await b.init(de, {
-        pageCount: F.numPages + (fe ? 1 : 0),
-        trailingBlank: fe,
-        pageWidth: ce,
-        pageHeight: ue,
+      const V = await E.getPage(1);
+      if (d !== M) return;
+      const ae = V.getViewport({ scale: 1 }), ue = n.width, de = n.height ?? Math.round(ue * (ae.height / ae.width));
+      await Ae();
+      const fe = c.value;
+      if (d !== M || !fe) return;
+      const he = n.showCover && E.numPages % 2 === 1, Me = await y.init(fe, {
+        pageCount: E.numPages + (he ? 1 : 0),
+        trailingBlank: he,
+        pageWidth: ue,
+        pageHeight: de,
         startPage: n.startPage,
         mode: n.mode,
         showCover: n.showCover,
@@ -962,57 +963,57 @@ const _e = ["disabled"], et = ["disabled"], tt = ["aria-label"], Pe = /* @__PURE
         flipOptions: n.flipOptions,
         pageClass: n.pageClass
       });
-      if (f !== R) {
-        b.destroy();
+      if (d !== M) {
+        y.destroy();
         return;
       }
-      P.setDocument(F), Le.forEach((pe, Me) => {
-        pe.canvas && P.registerCanvas(Me + 1, pe.canvas);
-      }), E(), p.value = u.value, x.value = { width: ce, height: ue }, v.value = ((he = b.getInstance()) == null ? void 0 : he.getOrientation()) ?? v.value, P.updateWindow(u.value), h.value = !0, requestAnimationFrame(() => {
-        f === R && (m.value = !0);
-      }), s("loaded", { totalPages: F.numPages, pdf: F });
+      R.setDocument(E), Me.forEach((ge, Oe) => {
+        ge.canvas && R.registerCanvas(Oe + 1, ge.canvas);
+      }), F(), v.value = u.value, L.value = { width: ue, height: de }, C.value = ((pe = y.getInstance()) == null ? void 0 : pe.getOrientation()) ?? C.value, R.updateWindow(u.value), h.value = !0, requestAnimationFrame(() => {
+        d === M && (b.value = !0);
+      }), s("loaded", { totalPages: E.numPages, pdf: E });
     }
-    function V() {
-      R++, h.value = !1, P.reset(), b.destroy(), I();
+    function ie() {
+      M++, h.value = !1, R.reset(), y.destroy(), S();
     }
-    Re(() => {
-      S.listen(), g.listen(), $();
-    }), We(() => {
-      S.unlisten(), g.unlisten(), V();
-    }), ze(
+    We(() => {
+      k.listen(), m.listen(), N();
+    }), ze(() => {
+      k.unlisten(), m.unlisten(), ie();
+    }), Be(
       () => n.src,
-      () => void $()
+      () => void N()
     );
-    function N() {
-      b.next();
-    }
     function H() {
-      b.prev();
+      y.next();
     }
-    function _(f) {
-      b.goToPage(f);
+    function T() {
+      y.prev();
     }
-    async function U() {
-      await $();
+    function _(d) {
+      y.goToPage(d);
     }
-    const se = Z(() => !h.value || v.value !== "landscape" ? null : n.showCover && p.value <= 1 ? "-25%" : p.value >= k.value ? "25%" : null), ee = Z(() => {
-      var f;
-      return Math.max(0, ((f = n.flipOptions) == null ? void 0 : f.flippingTime) ?? 800);
-    }), r = Z(() => {
-      const f = { position: "relative", width: "100%" };
-      if (m.value && ee.value > 0 && (f.transition = `transform ${ee.value}ms ease`), se.value && (f.transform = `translateX(${se.value})`), C.value && x.value) {
-        const j = (v.value === "landscape" ? 2 : 1) * x.value.width / x.value.height;
-        f.maxWidth = `min(100%, calc((100vh - 6rem) * ${j}))`, f.marginLeft = "auto", f.marginRight = "auto";
+    async function ee() {
+      await N();
+    }
+    const te = Z(() => !h.value || C.value !== "landscape" ? null : n.showCover && v.value <= 1 ? "-25%" : v.value >= x.value ? "25%" : null), r = Z(() => {
+      var d;
+      return Math.max(0, ((d = n.flipOptions) == null ? void 0 : d.flippingTime) ?? 800);
+    }), w = Z(() => {
+      const d = { position: "relative", width: "100%" };
+      if (b.value && r.value > 0 && (d.transition = `transform ${r.value}ms ease`), te.value && (d.transform = `translateX(${te.value})`), p.value && L.value) {
+        const V = (C.value === "landscape" ? 2 : 1) * L.value.width / L.value.height;
+        d.maxWidth = `min(100%, calc((100vh - 6rem) * ${V}))`, d.marginLeft = "auto", d.marginRight = "auto";
       }
-      return f;
-    }), w = Z(() => ({
+      return d;
+    }), D = Z(() => ({
       position: "relative",
       width: "100%",
-      overflow: g.zoom.value > 1 ? "hidden" : "visible"
-    })), D = Z(
-      () => h.value && u.value === 1 && !C.value && g.zoom.value === 1 && Fe()
-    ), A = Z(() => {
-      const f = {
+      overflow: m.zoom.value > 1 ? "hidden" : "visible"
+    })), A = Z(
+      () => h.value && g.value === 1 && !p.value && m.zoom.value === 1 && Le()
+    ), j = Z(() => {
+      const d = {
         position: "absolute",
         top: "0",
         height: "100%",
@@ -1022,105 +1023,105 @@ const _e = ["disabled"], et = ["disabled"], tt = ["aria-label"], Pe = /* @__PURE
         pointerEvents: "none",
         zIndex: "2"
       };
-      return v.value === "portrait" ? (f.left = "0", f.width = "100%") : n.showCover ? (f.left = "50%", f.width = "50%") : (f.left = "0", f.width = "50%"), f;
-    }), T = Z(
-      () => C.value ? { display: "flex", flexDirection: "column", justifyContent: "center", overflow: "auto" } : void 0
-    ), M = Z(() => ({
+      return C.value === "portrait" ? (d.left = "0", d.width = "100%") : n.showCover ? (d.left = "50%", d.width = "50%") : (d.left = "0", d.width = "50%"), d;
+    }), U = Z(
+      () => p.value ? { display: "flex", flexDirection: "column", justifyContent: "center", overflow: "auto" } : void 0
+    ), $ = Z(() => ({
       currentPage: u.value,
       visiblePages: l.value,
-      totalPages: k.value,
-      next: N,
-      prev: H,
+      totalPages: x.value,
+      next: H,
+      prev: T,
       goToPage: _,
-      canGoNext: u.value < k.value,
+      canGoNext: u.value < x.value,
       canGoPrev: u.value > 1,
-      isFullscreen: C.value,
-      toggleFullscreen: () => void S.toggle(),
-      zoom: g.zoom.value,
-      setZoom: g.setZoom,
-      resetZoom: g.reset
+      isFullscreen: p.value,
+      toggleFullscreen: () => void k.toggle(),
+      zoom: m.zoom.value,
+      setZoom: m.setZoom,
+      resetZoom: m.reset
     }));
     return e({
-      next: N,
-      prev: H,
+      next: H,
+      prev: T,
       goToPage: _,
-      currentPage: ae(u),
-      totalPages: ae(k),
-      reload: U,
-      isFullscreen: ae(C),
-      enterFullscreen: S.enter,
-      exitFullscreen: S.exit,
-      toggleFullscreen: S.toggle,
-      getPdfDocument: () => y.value,
-      getFlipInstance: () => b.getInstance(),
-      zoom: ae(g.zoom),
-      setZoom: g.setZoom,
-      resetZoom: g.reset
-    }), (f, F) => (K(), J("div", {
+      currentPage: re(u),
+      totalPages: re(x),
+      reload: ee,
+      isFullscreen: re(p),
+      enterFullscreen: k.enter,
+      exitFullscreen: k.exit,
+      toggleFullscreen: k.toggle,
+      getPdfDocument: () => O.value,
+      getFlipInstance: () => y.getInstance(),
+      zoom: re(m.zoom),
+      setZoom: m.setZoom,
+      resetZoom: m.reset
+    }), (d, E) => (K(), J("div", {
       ref_key: "rootRef",
       ref: o,
-      class: G(["vpf-container", [i.containerClass, Y(C) ? i.fullscreenClass : void 0]]),
-      style: te(T.value),
-      "data-fullscreen": Y(C) ? "" : void 0,
+      class: G(["vpf-container", [i.containerClass, Y(p) ? i.fullscreenClass : void 0]]),
+      style: ne(U.value),
+      "data-fullscreen": Y(p) ? "" : void 0,
       "data-controls-position": i.controlsPosition,
       "data-pdf-flipbook": ""
     }, [
-      Y(d) ? (K(), J("div", {
+      Y(P) ? (K(), J("div", {
         key: 0,
         class: G(["vpf-error", i.errorClass]),
         "data-pdf-flipbook-error": ""
       }, [
-        re(f.$slots, "error", {
-          error: Y(d),
-          retry: U
+        oe(d.$slots, "error", {
+          error: Y(P),
+          retry: ee
         }, () => [
-          X("div", null, "Failed to load PDF: " + oe(Y(d).message), 1),
+          X("div", null, "Failed to load PDF: " + le(Y(P).message), 1),
           X("button", {
             type: "button",
             class: G(["vpf-button", i.buttonClass]),
-            onClick: U
+            onClick: ee
           }, " Retry ", 2)
         ])
-      ], 2)) : Y(O) ? (K(), J("div", {
+      ], 2)) : Y(B) ? (K(), J("div", {
         key: 1,
         class: G(["vpf-loading", i.loadingClass]),
         "data-pdf-flipbook-loading": ""
       }, [
-        re(f.$slots, "loading", { progress: Y(B) }, () => [
-          F[1] || (F[1] = X("div", null, "Loading…", -1))
+        oe(d.$slots, "loading", { progress: Y(f) }, () => [
+          E[1] || (E[1] = X("div", null, "Loading…", -1))
         ])
-      ], 2)) : ne("", !0),
-      h.value && i.controlsPosition === "top" ? re(f.$slots, "controls", ve(me({ key: 2 }, M.value)), () => [
-        be(Pe, {
-          "current-page": M.value.currentPage,
-          "visible-pages": M.value.visiblePages,
-          "total-pages": M.value.totalPages,
-          "can-go-next": M.value.canGoNext,
-          "can-go-prev": M.value.canGoPrev,
-          "is-fullscreen": M.value.isFullscreen,
+      ], 2)) : se("", !0),
+      h.value && i.controlsPosition === "top" ? oe(d.$slots, "controls", me(be({ key: 2 }, $.value)), () => [
+        ye(xe, {
+          "current-page": $.value.currentPage,
+          "visible-pages": $.value.visiblePages,
+          "total-pages": $.value.totalPages,
+          "can-go-next": $.value.canGoNext,
+          "can-go-prev": $.value.canGoPrev,
+          "is-fullscreen": $.value.isFullscreen,
           "controls-class": i.controlsClass,
           "button-class": i.buttonClass,
           "page-indicator-class": i.pageIndicatorClass,
-          onNext: N,
-          onPrev: H,
-          onToggleFullscreen: M.value.toggleFullscreen
+          onNext: H,
+          onPrev: T,
+          onToggleFullscreen: $.value.toggleFullscreen
         }, null, 8, ["current-page", "visible-pages", "total-pages", "can-go-next", "can-go-prev", "is-fullscreen", "controls-class", "button-class", "page-indicator-class", "onToggleFullscreen"])
-      ]) : ne("", !0),
-      Be(X("div", {
+      ]) : se("", !0),
+      $e(X("div", {
         ref_key: "viewportRef",
         ref: a,
         class: "vpf-zoom-viewport",
-        style: te(w.value),
+        style: ne(D.value),
         "data-pdf-flipbook-viewport": ""
       }, [
         X("div", {
           class: "vpf-zoom-content",
-          style: te(Y(g).contentStyle.value),
+          style: ne(Y(m).contentStyle.value),
           "data-pdf-flipbook-zoom": ""
         }, [
           X("div", {
             class: "vpf-book-shell",
-            style: te(r.value),
+            style: ne(w.value),
             "data-pdf-flipbook-shell": ""
           }, [
             X("div", {
@@ -1129,49 +1130,49 @@ const _e = ["disabled"], et = ["disabled"], tt = ["aria-label"], Pe = /* @__PURE
               class: G(["vpf-book", i.bookClass]),
               "data-pdf-flipbook-book": ""
             }, null, 2),
-            D.value ? (K(), J("div", {
+            A.value ? (K(), J("div", {
               key: 0,
               class: "vpf-fullscreen-hint",
-              style: te(A.value),
+              style: ne(j.value),
               "data-pdf-flipbook-fullscreen-hint": ""
             }, [
               X("button", {
                 type: "button",
                 class: G(["vpf-button vpf-fullscreen-hint-button", i.buttonClass]),
                 "data-pdf-flipbook-fullscreen-hint-button": "",
-                onClick: F[0] || (F[0] = $e((j) => void Y(S).enter(), ["stop"]))
+                onClick: E[0] || (E[0] = Ye((V) => void Y(k).enter(), ["stop"]))
               }, " View in fullscreen ", 2)
-            ], 4)) : ne("", !0)
+            ], 4)) : se("", !0)
           ], 4)
         ], 4)
       ], 4), [
-        [Ye, !Y(d) && !Y(O)]
+        [De, !Y(P) && !Y(B)]
       ]),
-      h.value && i.controlsPosition === "bottom" ? re(f.$slots, "controls", ve(me({ key: 3 }, M.value)), () => [
-        be(Pe, {
-          "current-page": M.value.currentPage,
-          "visible-pages": M.value.visiblePages,
-          "total-pages": M.value.totalPages,
-          "can-go-next": M.value.canGoNext,
-          "can-go-prev": M.value.canGoPrev,
-          "is-fullscreen": M.value.isFullscreen,
+      h.value && i.controlsPosition === "bottom" ? oe(d.$slots, "controls", me(be({ key: 3 }, $.value)), () => [
+        ye(xe, {
+          "current-page": $.value.currentPage,
+          "visible-pages": $.value.visiblePages,
+          "total-pages": $.value.totalPages,
+          "can-go-next": $.value.canGoNext,
+          "can-go-prev": $.value.canGoPrev,
+          "is-fullscreen": $.value.isFullscreen,
           "controls-class": i.controlsClass,
           "button-class": i.buttonClass,
           "page-indicator-class": i.pageIndicatorClass,
-          onNext: N,
-          onPrev: H,
-          onToggleFullscreen: M.value.toggleFullscreen
+          onNext: H,
+          onPrev: T,
+          onToggleFullscreen: $.value.toggleFullscreen
         }, null, 8, ["current-page", "visible-pages", "total-pages", "can-go-next", "can-go-prev", "is-fullscreen", "controls-class", "button-class", "page-indicator-class", "onToggleFullscreen"])
-      ]) : ne("", !0)
-    ], 14, nt));
+      ]) : se("", !0)
+    ], 14, st));
   }
-}), rt = {
+}), ot = {
   install(i, e) {
-    e != null && e.workerSrc && Xe(e.workerSrc), i.component("PdfFlipbook", st);
+    e != null && e.workerSrc && Ge(e.workerSrc), i.component("PdfFlipbook", it);
   }
 };
 export {
-  st as PdfFlipbook,
-  rt as default,
-  Xe as setGlobalWorkerSrc
+  it as PdfFlipbook,
+  ot as default,
+  Ge as setGlobalWorkerSrc
 };
