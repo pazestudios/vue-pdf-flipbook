@@ -42,6 +42,8 @@ const visiblePages = ref<number[]>([1])
  * here while public numbering clamps to 1.
  */
 const engineFirstPage = ref(1)
+/** True while a flip animation is in flight (flip-start → flip end). */
+const flipping = ref(false)
 /** Page used for cover/back-cover centering; updates at flip-start so the shift runs with the flip. */
 const shiftPage = ref(1)
 const orientation = ref<'portrait' | 'landscape'>('landscape')
@@ -73,6 +75,7 @@ const zoom = useZoom(() => viewportRef.value, {
 
 const flip = usePageFlip({
   onFlip(page) {
+    flipping.value = false
     syncSpreadFromEngine()
     // shiftPage keeps the raw engine page: the synthetic blank back cover
     // numbers past the PDF, which is exactly what the >= totalPages check
@@ -82,11 +85,9 @@ const flip = usePageFlip({
     emit('page-changed', { page: currentPage.value, totalPages: totalPages.value })
   },
   onFlipStart(fromPage, toPage) {
+    flipping.value = true
     // Start the centering shift immediately so it runs in parallel with the flip.
     shiftPage.value = toPage
-    // Same for the fullscreen hint: hide (or reveal) it at flip-start rather
-    // than after the animation lands. onFlip re-syncs from the real spread.
-    engineFirstPage.value = toPage
     emit('flip-start', {
       fromPage: Math.min(fromPage, totalPages.value),
       toPage: Math.min(toPage, totalPages.value),
@@ -125,6 +126,7 @@ async function setup(): Promise<void> {
   const my = ++setupEpoch
   ready.value = false
   animateShift.value = false
+  flipping.value = false
   zoom.reset()
   renderer.reset()
   flip.destroy()
@@ -273,11 +275,13 @@ const zoomViewportStyle = computed<Record<string, string>>(() => ({
 
 /**
  * Hover prompt on the first page — hidden once fullscreen or unsupported,
- * and while zoomed in (clicks are captured for panning then).
+ * and while zoomed in (clicks are captured for panning then). Any in-flight
+ * flip hides it immediately; it only returns once the book settles on page 1.
  */
 const showFullscreenHint = computed(
   () =>
     ready.value &&
+    !flipping.value &&
     engineFirstPage.value === 1 &&
     !isFullscreen.value &&
     zoom.zoom.value === 1 &&

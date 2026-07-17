@@ -384,20 +384,32 @@ describe('PdfFlipbook', () => {
       )
     })
 
-    it('hides the hint at flip-start, before the animation lands', async () => {
+    it('hides the hint at flip-start and restores it only after the return flip lands', async () => {
       Object.defineProperty(document, 'fullscreenEnabled', {
         value: true,
         configurable: true,
       })
-      const wrapper = mountBook({ flipOptions: { flippingTime: 5000 } })
+      const wrapper = mountBook({ flipOptions: { flippingTime: 200 } })
       await whenReady(wrapper)
-      expect(wrapper.find('[data-pdf-flipbook-fullscreen-hint-button]').exists()).toBe(true)
+      const hint = () => wrapper.find('[data-pdf-flipbook-fullscreen-hint-button]')
+      expect(hint().exists()).toBe(true)
 
-      ;(wrapper.vm as unknown as { next: () => void }).next()
+      const vm = wrapper.vm as unknown as { next: () => void; prev: () => void }
+      vm.next()
       await wrapper.vm.$nextTick()
       // Mid-animation: the public page hasn't changed yet, but the hint is gone.
       expect(wrapper.find('[data-pdf-flipbook-indicator]').text()).toBe('1 / 8')
-      expect(wrapper.find('[data-pdf-flipbook-fullscreen-hint-button]').exists()).toBe(false)
+      expect(hint().exists()).toBe(false)
+      await vi.waitFor(() =>
+        expect(wrapper.find('[data-pdf-flipbook-indicator]').text()).toBe('2–3 / 8'),
+      )
+
+      vm.prev()
+      await wrapper.vm.$nextTick()
+      // Flipping back: the hint must wait for the animation to finish.
+      expect(hint().exists()).toBe(false)
+      await vi.waitFor(() => expect(hint().exists()).toBe(true))
+      expect(wrapper.find('[data-pdf-flipbook-indicator]').text()).toBe('1 / 8')
     })
   })
 
