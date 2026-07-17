@@ -36,6 +36,12 @@ const ready = ref(false)
 const currentPage = ref(1)
 /** Pages currently visible in the spread (one, or both of a landscape pair). */
 const visiblePages = ref<number[]>([1])
+/**
+ * Raw engine page of the current spread. Unlike `currentPage`, this counts the
+ * synthetic blank back cover, so a 1-page book on its blank spread reads 2
+ * here while public numbering clamps to 1.
+ */
+const engineFirstPage = ref(1)
 /** Page used for cover/back-cover centering; updates at flip-start so the shift runs with the flip. */
 const shiftPage = ref(1)
 const orientation = ref<'portrait' | 'landscape'>('landscape')
@@ -95,6 +101,7 @@ const flip = usePageFlip({
 function syncSpreadFromEngine(): void {
   const spread = flip.getInstance()?.getCurrentSpread()
   if (!spread?.length) return
+  engineFirstPage.value = spread[0]!
   // The synthetic blank back cover (page totalPages+1) has no PDF page:
   // report the last real page instead so public numbering never exceeds it.
   const real = spread.filter((p) => p <= totalPages.value)
@@ -268,7 +275,7 @@ const zoomViewportStyle = computed<Record<string, string>>(() => ({
 const showFullscreenHint = computed(
   () =>
     ready.value &&
-    currentPage.value === 1 &&
+    engineFirstPage.value === 1 &&
     !isFullscreen.value &&
     zoom.zoom.value === 1 &&
     fullscreenSupported(),

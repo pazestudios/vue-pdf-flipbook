@@ -359,6 +359,30 @@ describe('PdfFlipbook', () => {
         expect(wrapper.find('[data-pdf-flipbook-fullscreen-hint-button]').exists()).toBe(false),
       )
     })
+
+    it('hides the hint on the blank back cover of a 1-page book', async () => {
+      Object.defineProperty(document, 'fullscreenEnabled', {
+        value: true,
+        configurable: true,
+      })
+      __reset({ numPages: 1 })
+      const wrapper = mountBook()
+      await whenReady(wrapper)
+      // Spreads: [1] [blank]. Public numbering clamps the blank spread back to
+      // page 1, but the hint must not reappear there.
+      expect(wrapper.find('[data-pdf-flipbook-fullscreen-hint-button]').exists()).toBe(true)
+
+      ;(wrapper.vm as unknown as { next: () => void }).next()
+      await vi.waitFor(() =>
+        expect(wrapper.find('[data-pdf-flipbook-fullscreen-hint-button]').exists()).toBe(false),
+      )
+      expect(wrapper.find('[data-pdf-flipbook-indicator]').text()).toBe('1 / 1')
+
+      ;(wrapper.vm as unknown as { prev: () => void }).prev()
+      await vi.waitFor(() =>
+        expect(wrapper.find('[data-pdf-flipbook-fullscreen-hint-button]').exists()).toBe(true),
+      )
+    })
   })
 
   it('cleans up on unmount', async () => {
