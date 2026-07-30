@@ -157,13 +157,20 @@ async function setup(): Promise<void> {
   const firstPage = await doc.getPage(1)
   if (my !== setupEpoch) return
   const viewport = firstPage.getViewport({ scale: 1 })
-  const pageWidth = props.width
-  const pageHeight = props.height ?? Math.round(pageWidth * (viewport.height / viewport.width))
   // Wide pages read one at a time: a spread of two landscape pages is ~3:1,
   // so it can only ever fill a fraction of the screen's height. An explicit
   // mode wins — `auto` is the only one that asks us to decide.
   const vertical = props.isVertical ?? viewport.height >= viewport.width
   const mode = props.mode === 'auto' && !vertical ? 'single' : props.mode
+  // A lone wide page stands in for the whole book, so it takes the footprint a
+  // spread would: one `width` setting gives the same book size whichever way
+  // the PDF is turned. Without this the engine's size caps — which scale with
+  // the base page — stop a landscape book at half the size a portrait one
+  // reaches, so it stays small however much room the screen has.
+  const bookSpan = !vertical && mode === 'single' ? 2 : 1
+  const pageWidth = props.width * bookSpan
+  const pageHeight =
+    (props.height ?? Math.round(props.width * (viewport.height / viewport.width))) * bookSpan
 
   await nextTick()
   const bookEl = bookRef.value

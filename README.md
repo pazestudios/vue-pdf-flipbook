@@ -124,7 +124,7 @@ Every internal element also carries a stable data attribute (`data-pdf-flipbook`
 | `src` | `string \| URL \| ArrayBuffer \| Uint8Array` | — (required) | PDF source. Reactive — swapping reloads the book |
 | `pdfOptions` | `object` | — | Extra pdf.js `getDocument` parameters |
 | `workerSrc` | `string` | auto | pdf.js worker URL override |
-| `width` | `number` | `550` | Base single-page width (px) |
+| `width` | `number` | `550` | Base single-page width (px). A book is two pages wide, so this sets its base size to `2 × width` — a wide book's lone page spans that same width, giving both orientations the same footprint |
 | `height` | `number` | PDF aspect ratio | Base single-page height (px) |
 | `responsive` | `boolean` | `true` | Scale book to its container |
 | `minWidth` / `maxWidth` / `minHeight` / `maxHeight` | `number` | derived | Responsive size bounds |
@@ -195,6 +195,8 @@ The book is sized to the height fullscreen actually leaves after your controls, 
 ## Wide (landscape) PDFs
 
 A PDF whose pages are wider than they are tall is laid out **one page at a time** rather than as a two-page spread: side by side, two landscape pages make a book around 3:1, which shrinks the pages in a normal container and leaves most of a fullscreen screen empty.
+
+The lone wide page takes the footprint a two-page spread would, so a landscape and a portrait book built with the same `width` come out the same size and both grow to fill the space they're given.
 
 Detection is automatic (from the first page's viewport), so wide PDFs just work. Pass `isVertical` when you already know the shape — useful if the first page is a differently-sized cover:
 

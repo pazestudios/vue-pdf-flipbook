@@ -515,7 +515,11 @@ export class FlipEngine {
     const aspect = (across * pageWidth) / pageHeight
     const s = this.stage.style
     s.aspectRatio = String(aspect)
-    s.perspective = `${Math.round(across * pageWidth * 2.5)}px`
+    // Depth is set by the turning leaf, which is one page wide in either
+    // orientation (half the stage in a spread, all of it in single-page).
+    // Scaling with the stage instead would make a full-width leaf swing twice
+    // as far toward the viewer and project well outside the book.
+    s.perspective = `${Math.round(pageWidth * 5)}px`
     s.marginLeft = 'auto'
     s.marginRight = 'auto'
     if (this.opts.responsive === false) {

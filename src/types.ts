@@ -51,7 +51,13 @@ export interface PdfFlipbookProps {
   /** Override the pdf.js worker URL (recommended for offline/CSP environments). */
   workerSrc?: string
 
-  /** Base single-page width in px (default 550). */
+  /**
+   * Base single-page width in px (default 550). A book is two pages wide, so
+   * this sets the book's base size to `2 × width` — including a wide book
+   * showing one page at a time, whose lone page spans that whole width. The
+   * book scales past this to fill its container (see `responsive`), up to
+   * twice its base size unless `maxWidth` / `maxHeight` say otherwise.
+   */
   width?: number
   /** Base single-page height in px. Defaults to the PDF's own aspect ratio. */
   height?: number

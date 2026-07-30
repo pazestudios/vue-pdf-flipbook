@@ -285,6 +285,24 @@ describe('PdfFlipbook', () => {
       expect(stageAspect(wrapper)).toBeCloseTo(1 / 0.75, 2)
     })
 
+    it('gives a lone wide page the footprint of a spread, not of one page', async () => {
+      __reset({ numPages: 8, pageAspect: 0.75 })
+      const wrapper = mountBook({ width: 500, responsive: false })
+      await whenReady(wrapper)
+      const stage = wrapper.find('[data-pdf-flipbook-stage]').element as HTMLElement
+      // 2 x width, the same as the portrait spread below — anything less and
+      // the engine's size caps stop a landscape book at half the size.
+      expect(stage.style.width).toBe('1000px')
+      expect(stage.style.maxWidth).toBe('')
+
+      __reset({ numPages: 8 })
+      const portrait = mountBook({ width: 500, responsive: false })
+      await whenReady(portrait)
+      expect(
+        (portrait.find('[data-pdf-flipbook-stage]').element as HTMLElement).style.width,
+      ).toBe('1000px')
+    })
+
     it('skips the blank back cover on an odd wide book', async () => {
       __reset({ numPages: 7, pageAspect: 0.75 })
       const wrapper = mountBook()
