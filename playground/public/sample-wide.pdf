@@ -1,0 +1,201 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Count 8 /Kids [6 0 R 8 0 R 10 0 R 12 0 R 14 0 R 16 0 R 18 0 R 20 0 R] >>
+endobj
+3 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>
+endobj
+4 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+5 0 obj
+<< /Length 611 >>
+stream
+1 1 1 rg 0 0 842 595 re f
+0.09 0.25 0.45 rg 0 445 842 150 re f
+BT /F1 34 Tf 1 1 1 rg 1 0 0 1 64 523 Tm (Northwind Atlas) Tj ET
+BT /F2 16 Tf 0.85 0.9 0.95 rg 1 0 0 1 64 489 Tm (A landscape sample for vue-pdf-flipbook) Tj ET
+0.640 0.800 1.000 rg 64 325 330 12 re f
+0.640 0.800 1.000 rg 64 295 300 12 re f
+0.640 0.800 1.000 rg 64 265 340 12 re f
+0.640 0.800 1.000 rg 64 235 210 12 re f
+0.09 0.25 0.45 rg 448 215 330 200 re f
+BT /F1 120 Tf 0.9 0.91 0.93 rg 1 0 0 1 64 90 Tm (1) Tj ET
+0.8 0.82 0.85 RG 1 w 64 68 m 778 68 l S
+BT /F2 11 Tf 0.45 0.47 0.5 rg 1 0 0 1 64 46 Tm (Page 1 of 8 \267 842 x 595 landscape) Tj ET
+endstream
+endobj
+6 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 842 595] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents 5 0 R >>
+endobj
+7 0 obj
+<< /Length 601 >>
+stream
+1 1 1 rg 0 0 842 595 re f
+0.12 0.4 0.42 rg 0 445 842 150 re f
+BT /F1 34 Tf 1 1 1 rg 1 0 0 1 64 523 Tm (Wide pages) Tj ET
+BT /F2 16 Tf 0.85 0.9 0.95 rg 1 0 0 1 64 489 Tm (Read one at a time, not side by side) Tj ET
+0.670 0.950 0.970 rg 64 325 330 12 re f
+0.670 0.950 0.970 rg 64 295 300 12 re f
+0.670 0.950 0.970 rg 64 265 340 12 re f
+0.670 0.950 0.970 rg 64 235 210 12 re f
+0.12 0.4 0.42 rg 448 215 330 200 re f
+BT /F1 120 Tf 0.9 0.91 0.93 rg 1 0 0 1 64 90 Tm (2) Tj ET
+0.8 0.82 0.85 RG 1 w 64 68 m 778 68 l S
+BT /F2 11 Tf 0.45 0.47 0.5 rg 1 0 0 1 64 46 Tm (Page 2 of 8 \267 842 x 595 landscape) Tj ET
+endstream
+endobj
+8 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 842 595] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents 7 0 R >>
+endobj
+9 0 obj
+<< /Length 617 >>
+stream
+1 1 1 rg 0 0 842 595 re f
+0.45 0.24 0.18 rg 0 445 842 150 re f
+BT /F1 34 Tf 1 1 1 rg 1 0 0 1 64 523 Tm (Why not a spread?) Tj ET
+BT /F2 16 Tf 0.85 0.9 0.95 rg 1 0 0 1 64 489 Tm (Two landscape pages make a book roughly 3:1) Tj ET
+1.000 0.790 0.730 rg 64 325 330 12 re f
+1.000 0.790 0.730 rg 64 295 300 12 re f
+1.000 0.790 0.730 rg 64 265 340 12 re f
+1.000 0.790 0.730 rg 64 235 210 12 re f
+0.45 0.24 0.18 rg 448 215 330 200 re f
+BT /F1 120 Tf 0.9 0.91 0.93 rg 1 0 0 1 64 90 Tm (3) Tj ET
+0.8 0.82 0.85 RG 1 w 64 68 m 778 68 l S
+BT /F2 11 Tf 0.45 0.47 0.5 rg 1 0 0 1 64 46 Tm (Page 3 of 8 \267 842 x 595 landscape) Tj ET
+endstream
+endobj
+10 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 842 595] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents 9 0 R >>
+endobj
+11 0 obj
+<< /Length 612 >>
+stream
+1 1 1 rg 0 0 842 595 re f
+0.24 0.2 0.45 rg 0 445 842 150 re f
+BT /F1 34 Tf 1 1 1 rg 1 0 0 1 64 523 Tm (Fullscreen) Tj ET
+BT /F2 16 Tf 0.85 0.9 0.95 rg 1 0 0 1 64 489 Tm (The book fills the height left by your controls) Tj ET
+0.790 0.750 1.000 rg 64 325 330 12 re f
+0.790 0.750 1.000 rg 64 295 300 12 re f
+0.790 0.750 1.000 rg 64 265 340 12 re f
+0.790 0.750 1.000 rg 64 235 210 12 re f
+0.24 0.2 0.45 rg 448 215 330 200 re f
+BT /F1 120 Tf 0.9 0.91 0.93 rg 1 0 0 1 64 90 Tm (4) Tj ET
+0.8 0.82 0.85 RG 1 w 64 68 m 778 68 l S
+BT /F2 11 Tf 0.45 0.47 0.5 rg 1 0 0 1 64 46 Tm (Page 4 of 8 \267 842 x 595 landscape) Tj ET
+endstream
+endobj
+12 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 842 595] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents 11 0 R >>
+endobj
+13 0 obj
+<< /Length 604 >>
+stream
+1 1 1 rg 0 0 842 595 re f
+0.1 0.35 0.3 rg 0 445 842 150 re f
+BT /F1 34 Tf 1 1 1 rg 1 0 0 1 64 523 Tm (isVertical) Tj ET
+BT /F2 16 Tf 0.85 0.9 0.95 rg 1 0 0 1 64 489 Tm (Detected from page 1, or pass it yourself) Tj ET
+0.650 0.900 0.850 rg 64 325 330 12 re f
+0.650 0.900 0.850 rg 64 295 300 12 re f
+0.650 0.900 0.850 rg 64 265 340 12 re f
+0.650 0.900 0.850 rg 64 235 210 12 re f
+0.1 0.35 0.3 rg 448 215 330 200 re f
+BT /F1 120 Tf 0.9 0.91 0.93 rg 1 0 0 1 64 90 Tm (5) Tj ET
+0.8 0.82 0.85 RG 1 w 64 68 m 778 68 l S
+BT /F2 11 Tf 0.45 0.47 0.5 rg 1 0 0 1 64 46 Tm (Page 5 of 8 \267 842 x 595 landscape) Tj ET
+endstream
+endobj
+14 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 842 595] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents 13 0 R >>
+endobj
+15 0 obj
+<< /Length 598 >>
+stream
+1 1 1 rg 0 0 842 595 re f
+0.42 0.32 0.1 rg 0 445 842 150 re f
+BT /F1 34 Tf 1 1 1 rg 1 0 0 1 64 523 Tm (mode) Tj ET
+BT /F2 16 Tf 0.85 0.9 0.95 rg 1 0 0 1 64 489 Tm (An explicit single or spread still wins) Tj ET
+0.970 0.870 0.650 rg 64 325 330 12 re f
+0.970 0.870 0.650 rg 64 295 300 12 re f
+0.970 0.870 0.650 rg 64 265 340 12 re f
+0.970 0.870 0.650 rg 64 235 210 12 re f
+0.42 0.32 0.1 rg 448 215 330 200 re f
+BT /F1 120 Tf 0.9 0.91 0.93 rg 1 0 0 1 64 90 Tm (6) Tj ET
+0.8 0.82 0.85 RG 1 w 64 68 m 778 68 l S
+BT /F2 11 Tf 0.45 0.47 0.5 rg 1 0 0 1 64 46 Tm (Page 6 of 8 \267 842 x 595 landscape) Tj ET
+endstream
+endobj
+16 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 842 595] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents 15 0 R >>
+endobj
+17 0 obj
+<< /Length 596 >>
+stream
+1 1 1 rg 0 0 842 595 re f
+0.18 0.3 0.5 rg 0 445 842 150 re f
+BT /F1 34 Tf 1 1 1 rg 1 0 0 1 64 523 Tm (Zoom) Tj ET
+BT /F2 16 Tf 0.85 0.9 0.95 rg 1 0 0 1 64 489 Tm (Pinch, trackpad, or wheel over the book) Tj ET
+0.730 0.850 1.000 rg 64 325 330 12 re f
+0.730 0.850 1.000 rg 64 295 300 12 re f
+0.730 0.850 1.000 rg 64 265 340 12 re f
+0.730 0.850 1.000 rg 64 235 210 12 re f
+0.18 0.3 0.5 rg 448 215 330 200 re f
+BT /F1 120 Tf 0.9 0.91 0.93 rg 1 0 0 1 64 90 Tm (7) Tj ET
+0.8 0.82 0.85 RG 1 w 64 68 m 778 68 l S
+BT /F2 11 Tf 0.45 0.47 0.5 rg 1 0 0 1 64 46 Tm (Page 7 of 8 \267 842 x 595 landscape) Tj ET
+endstream
+endobj
+18 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 842 595] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents 17 0 R >>
+endobj
+19 0 obj
+<< /Length 610 >>
+stream
+1 1 1 rg 0 0 842 595 re f
+0.3 0.14 0.32 rg 0 445 842 150 re f
+BT /F1 34 Tf 1 1 1 rg 1 0 0 1 64 523 Tm (The end) Tj ET
+BT /F2 16 Tf 0.85 0.9 0.95 rg 1 0 0 1 64 489 Tm (Flip back with a swipe, a click, or the controls) Tj ET
+0.850 0.690 0.870 rg 64 325 330 12 re f
+0.850 0.690 0.870 rg 64 295 300 12 re f
+0.850 0.690 0.870 rg 64 265 340 12 re f
+0.850 0.690 0.870 rg 64 235 210 12 re f
+0.3 0.14 0.32 rg 448 215 330 200 re f
+BT /F1 120 Tf 0.9 0.91 0.93 rg 1 0 0 1 64 90 Tm (8) Tj ET
+0.8 0.82 0.85 RG 1 w 64 68 m 778 68 l S
+BT /F2 11 Tf 0.45 0.47 0.5 rg 1 0 0 1 64 46 Tm (Page 8 of 8 \267 842 x 595 landscape) Tj ET
+endstream
+endobj
+20 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 842 595] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents 19 0 R >>
+endobj
+xref
+0 21
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000163 00000 n 
+0000000238 00000 n 
+0000000308 00000 n 
+0000000970 00000 n 
+0000001106 00000 n 
+0000001758 00000 n 
+0000001894 00000 n 
+0000002562 00000 n 
+0000002699 00000 n 
+0000003363 00000 n 
+0000003501 00000 n 
+0000004157 00000 n 
+0000004295 00000 n 
+0000004945 00000 n 
+0000005083 00000 n 
+0000005731 00000 n 
+0000005869 00000 n 
+0000006531 00000 n 
+trailer
+<< /Size 21 /Root 1 0 R >>
+startxref
+6669
+%%EOF

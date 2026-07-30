@@ -68,6 +68,7 @@ mode: FlipMode;
 showCover: boolean;
 responsive: boolean;
 width: number;
+isVertical: boolean;
 renderScale: number;
 renderRange: number;
 controlsPosition: ControlsPosition;
@@ -266,6 +267,17 @@ export declare interface PdfFlipbookProps {
     startPage?: number;
     /** 'auto' | 'single' | 'spread'. Default 'auto'. */
     mode?: FlipMode;
+    /**
+     * Whether the PDF's pages are portrait (taller than wide). Defaults to
+     * auto-detection from the first page's viewport.
+     *
+     * Wide pages (`false`) are laid out one at a time instead of as a two-page
+     * spread: two landscape pages side by side make a book roughly 3:1 wide,
+     * which leaves most of the screen empty in fullscreen and shrinks the pages
+     * in a normal container. An explicit `mode` of `'single'` or `'spread'`
+     * still wins — this only steers `mode: 'auto'`.
+     */
+    isVertical?: boolean;
     /**
      * Show the first page alone (centered) like a book cover, and end the book
      * on a lone, centered back cover. PDFs with an odd page count get one blank

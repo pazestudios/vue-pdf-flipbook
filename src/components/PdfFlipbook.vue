@@ -19,6 +19,9 @@ const props = withDefaults(defineProps<PdfFlipbookProps>(), {
   responsive: true,
   startPage: 1,
   mode: 'auto',
+  // Explicitly undefined so Vue's Boolean prop casting doesn't turn "not
+  // passed" into `false`; the page aspect is auto-detected in that case.
+  isVertical: undefined,
   showCover: true,
   renderScale: 1.5,
   renderRange: 2,
@@ -48,6 +51,11 @@ const flipping = ref(false)
 const shiftPage = ref(1)
 const orientation = ref<'portrait' | 'landscape'>('landscape')
 const pageDims = ref<{ width: number; height: number } | null>(null)
+/**
+ * Height in px left for the book in fullscreen, measured from the DOM.
+ * 0 means "not measured" and falls back to a viewport-units estimate.
+ */
+const fitHeight = ref(0)
 
 const fullscreen = useFullscreen(
   () => rootRef.value,
@@ -55,7 +63,12 @@ const fullscreen = useFullscreen(
     emit('fullscreen-changed', active)
     // The flip engine observes the container, but re-check layout on the next
     // frame in case the fullscreen resize lands after the observer settles.
-    requestAnimationFrame(() => flip.getInstance()?.update())
+    requestAnimationFrame(() => {
+      flip.getInstance()?.update()
+      measureFit()
+    })
+    if (active) observeRoot()
+    else stopObservingRoot()
     // Interactive zoom is being gated off now — don't leave the book stuck
     // zoomed/panned with no gesture left to undo it.
     if (!active && props.pinchZoom === 'fullscreen') zoom.reset()
@@ -146,21 +159,27 @@ async function setup(): Promise<void> {
   const viewport = firstPage.getViewport({ scale: 1 })
   const pageWidth = props.width
   const pageHeight = props.height ?? Math.round(pageWidth * (viewport.height / viewport.width))
+  // Wide pages read one at a time: a spread of two landscape pages is ~3:1,
+  // so it can only ever fill a fraction of the screen's height. An explicit
+  // mode wins — `auto` is the only one that asks us to decide.
+  const vertical = props.isVertical ?? viewport.height >= viewport.width
+  const mode = props.mode === 'auto' && !vertical ? 'single' : props.mode
 
   await nextTick()
   const bookEl = bookRef.value
   if (my !== setupEpoch || !bookEl) return
 
   // A book with a cover needs an even page count to close on a lone back
-  // cover; odd PDFs get one synthetic blank page appended.
-  const trailingBlank = props.showCover && doc.numPages % 2 === 1
+  // cover; odd PDFs get one synthetic blank page appended. A single-page book
+  // never pairs pages, so it has nothing to pad.
+  const trailingBlank = props.showCover && mode !== 'single' && doc.numPages % 2 === 1
   const pages = await flip.init(bookEl, {
     pageCount: doc.numPages + (trailingBlank ? 1 : 0),
     trailingBlank,
     pageWidth,
     pageHeight,
     startPage: props.startPage,
-    mode: props.mode,
+    mode,
     showCover: props.showCover,
     responsive: props.responsive,
     minWidth: props.minWidth,
@@ -186,7 +205,9 @@ async function setup(): Promise<void> {
   renderer.updateWindow(currentPage.value)
   ready.value = true
   requestAnimationFrame(() => {
-    if (my === setupEpoch) animateShift.value = true
+    if (my !== setupEpoch) return
+    animateShift.value = true
+    measureFit()
   })
   emit('loaded', { totalPages: doc.numPages, pdf: doc })
 }
@@ -207,6 +228,7 @@ onMounted(() => {
 onBeforeUnmount(() => {
   fullscreen.unlisten()
   zoom.unlisten()
+  stopObservingRoot()
   destroyAll()
 })
 watch(
@@ -242,6 +264,50 @@ const singleShift = computed<string | null>(() => {
 
 const shiftDurationMs = computed(() => Math.max(0, props.flipOptions?.flippingTime ?? 800))
 
+/**
+ * Measure how much height fullscreen actually leaves for the book: the
+ * container's content box minus everything else it stacks (controls, and
+ * whatever a consumer renders into the controls slot). Measured rather than
+ * assumed because that slot can hold anything — a fixed reserve either
+ * overflows the screen or leaves a band of dead space above the book.
+ */
+function measureFit(): void {
+  const root = rootRef.value
+  const viewportEl = viewportRef.value
+  if (!isFullscreen.value || !root || !viewportEl || typeof getComputedStyle !== 'function') {
+    fitHeight.value = 0
+    return
+  }
+  const rootStyle = getComputedStyle(root)
+  let available =
+    root.clientHeight - parseFloat(rootStyle.paddingTop) - parseFloat(rootStyle.paddingBottom)
+  for (const child of Array.from(root.children)) {
+    if (child === viewportEl) continue
+    const style = getComputedStyle(child)
+    if (style.position === 'absolute' || style.position === 'fixed') continue
+    available -=
+      child.getBoundingClientRect().height +
+      parseFloat(style.marginTop) +
+      parseFloat(style.marginBottom)
+  }
+  fitHeight.value = Number.isFinite(available) ? Math.max(0, available) : 0
+}
+
+/* Re-measure while fullscreen: rotating the device or an OS bar resizes it. */
+let rootObserver: ResizeObserver | null = null
+
+function observeRoot(): void {
+  if (rootObserver || typeof ResizeObserver === 'undefined' || !rootRef.value) return
+  rootObserver = new ResizeObserver(() => measureFit())
+  rootObserver.observe(rootRef.value)
+}
+
+function stopObservingRoot(): void {
+  rootObserver?.disconnect()
+  rootObserver = null
+  fitHeight.value = 0
+}
+
 /** Shared by the book and the first-page fullscreen hint so they stay aligned. */
 const shellStyle = computed<Record<string, string>>(() => {
   // width:100% is required so percentage-sized stage children don't collapse
@@ -252,11 +318,15 @@ const shellStyle = computed<Record<string, string>>(() => {
   }
   if (singleShift.value) style.transform = `translateX(${singleShift.value})`
   if (isFullscreen.value && pageDims.value) {
-    // Cap the stretched book so its height fits the screen (with room for
-    // controls), and keep it horizontally centered under that cap.
+    // Cap the stretched book so its height fits the screen, and keep it
+    // horizontally centered under that cap. The measured leftover height is
+    // exact; the viewport-units form is the fallback before the first measure
+    // (and when there is no ResizeObserver to keep it current).
     const pagesAcross = orientation.value === 'landscape' ? 2 : 1
     const aspect = (pagesAcross * pageDims.value.width) / pageDims.value.height
-    style.maxWidth = `min(100%, calc((100vh - 6rem) * ${aspect}))`
+    style.maxWidth = fitHeight.value
+      ? `min(100%, ${(fitHeight.value * aspect).toFixed(2)}px)`
+      : `min(100%, calc((100vh - 6rem) * ${aspect}))`
     style.marginLeft = 'auto'
     style.marginRight = 'auto'
   }

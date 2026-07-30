@@ -130,6 +130,7 @@ Every internal element also carries a stable data attribute (`data-pdf-flipbook`
 | `minWidth` / `maxWidth` / `minHeight` / `maxHeight` | `number` | derived | Responsive size bounds |
 | `startPage` | `number` | `1` | Initial page (1-based) |
 | `mode` | `'auto' \| 'single' \| 'spread'` | `'auto'` | Page display mode |
+| `isVertical` | `boolean` | detected | Whether the PDF's pages are portrait. Wide (`false`) pages are shown one at a time — a spread of two landscape pages is roughly 3:1 and can only fill a fraction of the screen. Detected from the first page unless you pass it; an explicit `mode` of `'single'` or `'spread'` still wins |
 | `showCover` | `boolean` | `true` | Open on the first page alone (centered) and close on a lone back cover. Odd page counts get a blank filler page appended (`.vpf-page-blank`, stylable via CSS); it never appears in page numbers. Set `false` to always show full spreads |
 | `flipOptions` | `FlipOptions` | — | Flip animation tuning (`flippingTime`, `drawShadow`, `maxShadowOpacity`, `swipeDistance`, `useMouseEvents`, `disableFlipByClick`) |
 | `renderScale` | `number` | `1.5` | Render quality multiplier (× capped devicePixelRatio) |
@@ -189,6 +190,20 @@ The default controls include a fullscreen toggle (hidden when the browser doesn'
 <PdfFlipbook src="/document.pdf" fullscreen-class="!bg-slate-900 !rounded-none" />
 ```
 
+The book is sized to the height fullscreen actually leaves after your controls, so it fills the screen no matter what you render into the `controls` slot.
+
+## Wide (landscape) PDFs
+
+A PDF whose pages are wider than they are tall is laid out **one page at a time** rather than as a two-page spread: side by side, two landscape pages make a book around 3:1, which shrinks the pages in a normal container and leaves most of a fullscreen screen empty.
+
+Detection is automatic (from the first page's viewport), so wide PDFs just work. Pass `isVertical` when you already know the shape — useful if the first page is a differently-sized cover:
+
+```vue
+<PdfFlipbook src="/landscape-brochure.pdf" :is-vertical="false" />
+```
+
+`mode` still overrides this: `mode="spread"` keeps two wide pages side by side, `mode="single"` forces one page for a portrait PDF.
+
 ## Zoom
 
 Zoom in with a touch pinch, trackpad pinch, or the mouse wheel over the book (up to `maxZoom`, default 2×). While zoomed, dragging pans the page instead of flipping it — the prev/next controls still work and keep the zoom. Zooming stays sharp because pages are pre-rendered above CSS size (`renderScale`). Programmatic control: `setZoom(level)` / `resetZoom()` via the template ref or the `controls` slot, plus a `zoom-changed` event. Set `:max-zoom="1"` to disable zooming.
@@ -212,6 +227,8 @@ npm test           # vitest
 npm run typecheck  # vue-tsc
 npm run build      # library build to dist/
 ```
+
+The playground switches between a portrait sample (a 14-page paper) and a landscape one (an 8-page brochure), with `mode` and `isVertical` selectors next to them — the quickest way to see how wide pages are laid out.
 
 ## License
 

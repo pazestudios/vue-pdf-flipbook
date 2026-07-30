@@ -1,12 +1,21 @@
 <script setup lang="ts">
-import { ref, useTemplateRef } from 'vue'
+import { computed, ref, useTemplateRef } from 'vue'
 import type { PdfFlipbookExpose } from 'vue-pdf-flipbook'
 
 const src = ref('/sample.pdf')
 const book = useTemplateRef<PdfFlipbookExpose>('book')
 const mode = ref<'auto' | 'single' | 'spread'>('auto')
+/** '' leaves the page aspect to auto-detection. */
+const isVertical = ref<'' | 'true' | 'false'>('')
 const useCustomControls = ref(true)
 const lastEvent = ref('—')
+
+// mode and isVertical are read while the book is built, so changing either
+// has to remount the component; src is reactive on its own.
+const bookKey = computed(() => `${src.value}|${mode.value}|${isVertical.value}`)
+const isVerticalProp = computed(() =>
+  isVertical.value === '' ? undefined : isVertical.value === 'true',
+)
 
 function log(name: string, payload?: unknown) {
   lastEvent.value = `${name} ${payload ? JSON.stringify(payload) : ''}`
@@ -20,11 +29,26 @@ function log(name: string, payload?: unknown) {
 
     <div class="flex flex-wrap items-center gap-3 text-sm">
       <label class="flex items-center gap-1">
+        PDF:
+        <select v-model="src" class="rounded border border-slate-300 px-2 py-1">
+          <option value="/sample.pdf">portrait (14pp paper)</option>
+          <option value="/sample-wide.pdf">landscape (8pp brochure)</option>
+        </select>
+      </label>
+      <label class="flex items-center gap-1">
         Mode:
         <select v-model="mode" class="rounded border border-slate-300 px-2 py-1">
           <option value="auto">auto</option>
           <option value="single">single</option>
           <option value="spread">spread</option>
+        </select>
+      </label>
+      <label class="flex items-center gap-1">
+        isVertical:
+        <select v-model="isVertical" class="rounded border border-slate-300 px-2 py-1">
+          <option value="">detect</option>
+          <option value="true">true</option>
+          <option value="false">false</option>
         </select>
       </label>
       <label class="flex items-center gap-1">
@@ -41,9 +65,10 @@ function log(name: string, payload?: unknown) {
 
     <PdfFlipbook
       ref="book"
-      :key="mode"
+      :key="bookKey"
       :src="src"
       :mode="mode"
+      :is-vertical="isVerticalProp"
       controls-position="top"
       container-class="rounded-xl bg-white p-6 shadow-lg"
       fullscreen-class="!bg-slate-900 !rounded-none"

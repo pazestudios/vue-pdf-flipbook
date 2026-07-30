@@ -266,6 +266,56 @@ describe('PdfFlipbook', () => {
     })
   })
 
+  describe('wide (landscape) pages', () => {
+    /** The rendered stage aspect ratio — 2 pages across doubles it. */
+    function stageAspect(wrapper: ReturnType<typeof mountBook>): number {
+      const stage = wrapper.find('[data-pdf-flipbook-stage]').element as HTMLElement
+      return parseFloat(stage.style.aspectRatio)
+    }
+
+    it('lays wide pages out one at a time instead of as a spread', async () => {
+      __reset({ numPages: 8, pageAspect: 0.75 })
+      const wrapper = mountBook()
+      await whenReady(wrapper)
+      // A spread would read "2–3 / 8" here and be twice as wide.
+      ;(wrapper.vm as unknown as { next: () => void }).next()
+      await vi.waitFor(() =>
+        expect(wrapper.find('[data-pdf-flipbook-indicator]').text()).toBe('2 / 8'),
+      )
+      expect(stageAspect(wrapper)).toBeCloseTo(1 / 0.75, 2)
+    })
+
+    it('skips the blank back cover on an odd wide book', async () => {
+      __reset({ numPages: 7, pageAspect: 0.75 })
+      const wrapper = mountBook()
+      await whenReady(wrapper)
+      expect(wrapper.findAll('[data-pdf-flipbook-page]')).toHaveLength(7)
+      expect(wrapper.find('[data-pdf-flipbook-blank]').exists()).toBe(false)
+    })
+
+    it('lets isVertical override the detected page aspect both ways', async () => {
+      __reset({ numPages: 8, pageAspect: 0.75 })
+      const forcedSpread = mountBook({ isVertical: true })
+      await whenReady(forcedSpread)
+      expect(stageAspect(forcedSpread)).toBeCloseTo(2 / 0.75, 2)
+
+      __reset({ numPages: 8 })
+      const forcedSingle = mountBook({ isVertical: false })
+      await whenReady(forcedSingle)
+      expect(stageAspect(forcedSingle)).toBeCloseTo(0.75, 2)
+    })
+
+    it('keeps an explicit spread mode for wide pages', async () => {
+      __reset({ numPages: 8, pageAspect: 0.75 })
+      const wrapper = mountBook({ mode: 'spread' })
+      await whenReady(wrapper)
+      ;(wrapper.vm as unknown as { next: () => void }).next()
+      await vi.waitFor(() =>
+        expect(wrapper.find('[data-pdf-flipbook-indicator]').text()).toBe('2–3 / 8'),
+      )
+    })
+  })
+
   describe('fullscreen', () => {
     afterEach(() => {
       Object.defineProperty(document, 'fullscreenElement', {
