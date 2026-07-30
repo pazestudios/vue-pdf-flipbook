@@ -127,7 +127,7 @@ Every internal element also carries a stable data attribute (`data-pdf-flipbook`
 | `width` | `number` | `550` | Base single-page width (px). A book is two pages wide, so this sets its base size to `2 × width` — a wide book's lone page spans that same width, giving both orientations the same footprint |
 | `height` | `number` | PDF aspect ratio | Base single-page height (px) |
 | `responsive` | `boolean` | `true` | Scale book to its container |
-| `minWidth` / `maxWidth` / `minHeight` / `maxHeight` | `number` | derived | Responsive size bounds |
+| `minWidth` / `maxWidth` / `minHeight` / `maxHeight` | `number` | derived | Responsive size bounds, per single page (a landscape spread is two pages across). They bound the book **inline only** — fullscreen ignores them and fills the screen |
 | `startPage` | `number` | `1` | Initial page (1-based) |
 | `mode` | `'auto' \| 'single' \| 'spread'` | `'auto'` | Page display mode |
 | `isVertical` | `boolean` | detected | Whether the PDF's pages are portrait. Wide (`false`) pages are shown one at a time — a spread of two landscape pages is roughly 3:1 and can only fill a fraction of the screen. Detected from the first page unless you pass it; an explicit `mode` of `'single'` or `'spread'` still wins |
@@ -190,7 +190,7 @@ The default controls include a fullscreen toggle (hidden when the browser doesn'
 <PdfFlipbook src="/document.pdf" fullscreen-class="!bg-slate-900 !rounded-none" />
 ```
 
-The book is sized to the height fullscreen actually leaves after your controls, so it fills the screen no matter what you render into the `controls` slot.
+The book is sized to the height fullscreen actually leaves after your controls, so it fills the screen no matter what you render into the `controls` slot. Fullscreen also drops `maxWidth` / `maxHeight` and a `responsive: false` fixed width: those describe how big the book may get inside your page, and honouring them on a full screen would strand it at its inline size.
 
 ## Wide (landscape) PDFs
 

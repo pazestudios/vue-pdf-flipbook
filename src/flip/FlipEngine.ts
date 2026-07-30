@@ -107,6 +107,7 @@ export class FlipEngine {
   private readonly opts: FlipEngineOptions
 
   private orientation: Orientation
+  private fillMode = false
   private chrome: ChromeElements | null = null
   private spreads: number[][] = []
   private spreadIndex = 0
@@ -187,6 +188,20 @@ export class FlipEngine {
 
   getOrientation(): Orientation {
     return this.orientation
+  }
+
+  /**
+   * Grow the book to whatever the container offers, ignoring the configured
+   * size caps. Fullscreen turns this on: `maxWidth`/`maxHeight` (and a fixed
+   * `responsive: false` width) describe how big the book may get *inside the
+   * page*, and applying them on a screen many times larger would strand it at
+   * its inline size — the one thing fullscreen exists to undo. The caller
+   * still bounds the stage by the height fullscreen actually leaves.
+   */
+  setFillMode(fill: boolean): void {
+    if (this.destroyed || this.fillMode === fill) return
+    this.fillMode = fill
+    this.applyStageSize()
   }
 
   /** Re-measure the container and re-apply layout. */
@@ -540,6 +555,12 @@ export class FlipEngine {
     s.perspective = `${Math.round(pageWidth * 5)}px`
     s.marginLeft = 'auto'
     s.marginRight = 'auto'
+    if (this.fillMode) {
+      s.width = '100%'
+      s.maxWidth = ''
+      s.minWidth = ''
+      return
+    }
     if (this.opts.responsive === false) {
       s.width = `${across * pageWidth}px`
       s.maxWidth = ''

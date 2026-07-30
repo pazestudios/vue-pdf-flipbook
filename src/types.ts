@@ -38,6 +38,8 @@ export interface PageFlipInstance {
   /** Pages currently visible in the spread, 1-based (one or two). */
   getCurrentSpread(): number[]
   getOrientation(): 'portrait' | 'landscape'
+  /** Grow the book to its container, ignoring `maxWidth`/`maxHeight`. Fullscreen uses this. */
+  setFillMode(fill: boolean): void
   /** Re-measure the container and re-apply layout. */
   update(): void
   destroy(): void

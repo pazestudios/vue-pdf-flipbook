@@ -303,6 +303,31 @@ describe('FlipEngine', () => {
     expect(root.querySelector('.vpf-page-bend-left')).toBeNull()
   })
 
+  it('drops the size caps in fill mode and restores them when it is turned off', () => {
+    const { root, engine } = makeEngine({ maxWidth: 900, minWidth: 280 })
+    const stage = root.querySelector<HTMLElement>('.vpf-stage')!
+    // maxWidth caps a single page, and a landscape spread is two pages across.
+    expect(stage.style.maxWidth).toBe('1800px')
+
+    engine.setFillMode(true)
+    expect(stage.style.width).toBe('100%')
+    expect(stage.style.maxWidth).toBe('')
+    expect(stage.style.minWidth).toBe('')
+
+    engine.setFillMode(false)
+    // maxWidth caps a single page, and a landscape spread is two pages across.
+    expect(stage.style.maxWidth).toBe('1800px')
+  })
+
+  it('fill mode overrides a fixed non-responsive width', () => {
+    const { root, engine } = makeEngine({ responsive: false })
+    const stage = root.querySelector<HTMLElement>('.vpf-stage')!
+    expect(stage.style.width).toBe('1000px')
+
+    engine.setFillMode(true)
+    expect(stage.style.width).toBe('100%')
+  })
+
   it('destroy removes everything from the mount element', () => {
     const { root, engine } = makeEngine()
     expect(root.children.length).toBe(1)

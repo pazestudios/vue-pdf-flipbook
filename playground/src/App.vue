@@ -8,11 +8,14 @@ const mode = ref<'auto' | 'single' | 'spread'>('auto')
 /** '' leaves the page aspect to auto-detection. */
 const isVertical = ref<'' | 'true' | 'false'>('')
 const useCustomControls = ref(true)
+/** '' = uncapped. A px cap reproduces a consumer that limits the inline book size. */
+const maxWidth = ref<'' | '900'>('')
 const lastEvent = ref('—')
 
 // mode and isVertical are read while the book is built, so changing either
 // has to remount the component; src is reactive on its own.
-const bookKey = computed(() => `${src.value}|${mode.value}|${isVertical.value}`)
+const bookKey = computed(() => `${src.value}|${mode.value}|${isVertical.value}|${maxWidth.value}`)
+const maxWidthProp = computed(() => (maxWidth.value === '' ? undefined : Number(maxWidth.value)))
 const isVerticalProp = computed(() =>
   isVertical.value === '' ? undefined : isVertical.value === 'true',
 )
@@ -33,6 +36,7 @@ function log(name: string, payload?: unknown) {
         <select v-model="src" class="rounded border border-slate-300 px-2 py-1">
           <option value="/sample.pdf">portrait (14pp paper)</option>
           <option value="/sample-wide.pdf">landscape (8pp brochure)</option>
+          <option value="/sample-single-landscape.pdf">landscape (1pp flyer)</option>
         </select>
       </label>
       <label class="flex items-center gap-1">
@@ -49,6 +53,13 @@ function log(name: string, payload?: unknown) {
           <option value="">detect</option>
           <option value="true">true</option>
           <option value="false">false</option>
+        </select>
+      </label>
+      <label class="flex items-center gap-1">
+        maxWidth:
+        <select v-model="maxWidth" class="rounded border border-slate-300 px-2 py-1">
+          <option value="">none</option>
+          <option value="900">900px</option>
         </select>
       </label>
       <label class="flex items-center gap-1">
@@ -69,6 +80,7 @@ function log(name: string, payload?: unknown) {
       :src="src"
       :mode="mode"
       :is-vertical="isVerticalProp"
+      :max-width="maxWidthProp"
       controls-position="top"
       container-class="rounded-xl bg-white p-6 shadow-lg"
       fullscreen-class="!bg-slate-900 !rounded-none"

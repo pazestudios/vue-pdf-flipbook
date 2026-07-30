@@ -61,6 +61,10 @@ const fullscreen = useFullscreen(
   () => rootRef.value,
   (active) => {
     emit('fullscreen-changed', active)
+    // Let the book outgrow `maxWidth`/`maxHeight` while fullscreen: those cap
+    // it for the surrounding page, and keeping them here would leave the book
+    // at its inline size on a screen several times bigger.
+    flip.getInstance()?.setFillMode(active)
     // The flip engine observes the container, but re-check layout on the next
     // frame in case the fullscreen resize lands after the observer settles.
     requestAnimationFrame(() => {
@@ -200,6 +204,10 @@ async function setup(): Promise<void> {
     flip.destroy()
     return
   }
+
+  // A reload (src swap) while fullscreen builds a fresh engine that has never
+  // seen the fullscreen change event, so seed the mode from current state.
+  if (isFullscreen.value) flip.getInstance()?.setFillMode(true)
 
   renderer.setDocument(doc)
   pages.forEach((page, i) => {
