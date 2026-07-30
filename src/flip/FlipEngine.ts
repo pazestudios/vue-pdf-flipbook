@@ -509,6 +509,24 @@ export class FlipEngine {
     cs.background = late ? to.coverSpineBg : from.coverSpineBg
   }
 
+  /**
+   * Per-frame chrome update during a portrait (single-page) flip. The leaf is
+   * a full-width card turning about its own centre, so its footprint narrows
+   * with the cosine of the angle and vanishes edge-on. The drop shadow follows
+   * it instead of staying full width under a page that is no longer there, and
+   * fades as it narrows so the collapsing box-shadow blur doesn't pile up into
+   * a dark bar at the halfway point.
+   */
+  private stepPortraitChrome(eased: number): void {
+    const chrome = this.chrome
+    if (!chrome) return
+    const cover = Math.abs(Math.cos(Math.PI * eased))
+    const ss = chrome.shadow.style
+    ss.left = pct((1 - cover) / 2)
+    ss.width = pct(cover)
+    ss.opacity = String(0.2 + 0.8 * cover)
+  }
+
   private applyStageSize(): void {
     const { pageWidth, pageHeight } = this.opts
     const across = this.orientation === 'landscape' ? 2 : 1
@@ -586,8 +604,9 @@ export class FlipEngine {
     let chromeStep: ((eased: number) => void) | null = null
     if (this.chrome) {
       if (this.orientation === 'portrait') {
-        // Portrait chrome is a constant full-width shadow; no need to animate.
-        this.updateChrome(target)
+        // Portrait has no spine or bend overlays, only the drop shadow — but
+        // it has to track the turning card so it doesn't sit still under it.
+        chromeStep = (eased) => this.stepPortraitChrome(eased)
       } else {
         const staticLeft = statics.some((s) => s.page !== undefined && s.slot === 'left')
         const staticRight = statics.some((s) => s.page !== undefined && s.slot === 'right')

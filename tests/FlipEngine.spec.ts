@@ -253,6 +253,32 @@ describe('FlipEngine', () => {
     }
   })
 
+  it('narrows the shadow with the turning card in portrait, restoring it on landing', async () => {
+    vi.useFakeTimers()
+    const raf = vi
+      .spyOn(globalThis, 'requestAnimationFrame')
+      .mockImplementation((cb) => setTimeout(() => cb(performance.now()), 16) as unknown as number)
+    try {
+      const { root, engine } = makeEngine({ mode: 'single', flippingTime: 200 })
+      const shadow = root.querySelector<HTMLElement>('.vpf-book-shadow')!
+      engine.flipNext()
+      // Mid-flip the card is edge-on: the shadow must have narrowed and stayed
+      // centred under it rather than covering the full stage.
+      await vi.advanceTimersByTimeAsync(100)
+      const width = Number.parseFloat(shadow.style.width)
+      expect(width).toBeLessThan(60)
+      expect(Number.parseFloat(shadow.style.left)).toBeCloseTo((100 - width) / 2, 1)
+      expect(Number.parseFloat(shadow.style.opacity)).toBeLessThan(1)
+      await vi.advanceTimersByTimeAsync(400)
+      expect(shadow.style.left).toBe('0%')
+      expect(shadow.style.width).toBe('100%')
+      expect(shadow.style.opacity).toBe('1')
+    } finally {
+      raf.mockRestore()
+      vi.useRealTimers()
+    }
+  })
+
   it('keeps gutter shading on both faces of the moving leaf, removed when it lands', async () => {
     vi.useFakeTimers()
     const raf = vi
