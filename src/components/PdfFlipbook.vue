@@ -393,9 +393,17 @@ const fullscreenHintStyle = computed<Record<string, string>>(() => {
   return style
 })
 
+/**
+ * Fullscreen stacks the controls and the book from the top, so any leftover
+ * height collects below rather than being split above the controls — a book
+ * that runs out of width before it runs out of height (a very wide page)
+ * would otherwise push the controls into the middle of the screen. It also
+ * keeps the top reachable if the content ever does overflow, which centering
+ * in a scroll container does not.
+ */
 const containerStyle = computed<Record<string, string> | undefined>(() =>
   isFullscreen.value
-    ? { display: 'flex', flexDirection: 'column', justifyContent: 'center', overflow: 'auto' }
+    ? { display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', overflow: 'auto' }
     : undefined,
 )
 

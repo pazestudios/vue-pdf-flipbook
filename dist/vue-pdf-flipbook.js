@@ -1049,7 +1049,7 @@ const ct = ["disabled"], ut = ["disabled"], dt = ["aria-label"], Le = /* @__PURE
       };
       return x.value === "portrait" ? (d.left = "0", d.width = "100%") : n.showCover ? (d.left = "50%", d.width = "50%") : (d.left = "0", d.width = "50%"), d;
     }), Ye = V(
-      () => k.value ? { display: "flex", flexDirection: "column", justifyContent: "center", overflow: "auto" } : void 0
+      () => k.value ? { display: "flex", flexDirection: "column", justifyContent: "flex-start", overflow: "auto" } : void 0
     ), $ = V(() => ({
       currentPage: u.value,
       visiblePages: l.value,
